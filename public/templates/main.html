@@ -36,8 +36,8 @@
 	class Panel extends React.Component {
 		render() {
 			return (
-				<button className="genericpanel" id={this.props.node}  style={{position: this.props.position, top: this.props.top + "%", left: this.props.left + "%", backgroundColor: this.props.color}}>
-					{this.props.node}
+				<button className="genericpanel" id={"seti-node" + this.props.node/10 + "/" + this.props.node % 10}  style={{position: this.props.position, top: this.props.top + "%", left: this.props.left + "%", backgroundColor: this.props.color}}>
+					seti-node{Math.floor(this.props.node/10)}/{this.props.node%10}
 				</button>
 			);
 		}
@@ -47,17 +47,17 @@
 		render(){
 			return (
 				<React.Fragment>
-					<Panel node={"seti-node1/0"} top={30} left={25} position={"fixed"} color={"#456789"}/>
-					<Panel node={"seti-node1/1"} top={30} left={35} position={"fixed"} color={"#987654"}/>
+					<Panel node={10} top={30} left={25} position={"fixed"} color={"#456789"}/>
+					<Panel node={11} top={30} left={35} position={"fixed"} color={"#987654"}/>
 
-					<Panel node={"seti-node2/0"} top={30} left={65} position={"fixed"} color={"#456789"}/>
-					<Panel node={"seti-node2/1"} top={30} left={75} position={"fixed"} color={"#987654"}/>
+					<Panel node={20} top={30} left={65} position={"fixed"} color={"#456789"}/>
+					<Panel node={21} top={30} left={75} position={"fixed"} color={"#987654"}/>
 
-					<Panel node={"seti-node3/0"} top={60} left={25} position={"fixed"} color={"#456789"}/>
-					<Panel node={"seti-node3/1"} top={60} left={35} position={"fixed"} color={"#987654"}/>
+					<Panel node={30} top={60} left={25} position={"fixed"} color={"#456789"}/>
+					<Panel node={31} top={60} left={35} position={"fixed"} color={"#987654"}/>
 
-					<Panel node={"seti-node4/0"} top={60} left={65} position={"fixed"} color={"#456789"}/>
-					<Panel node={"seti-node4/1"} top={60} left={75} position={"fixed"} color={"#987654"}/>
+					<Panel node={40} top={60} left={65} position={"fixed"} color={"#456789"}/>
+					<Panel node={41} top={60} left={75} position={"fixed"} color={"#987654"}/>
 				</React.Fragment>
 			);
 		}
