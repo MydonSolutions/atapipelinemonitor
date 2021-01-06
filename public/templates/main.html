@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>ATA Pipeline Monitor</title>
+	<style>
+		body {background-color: #123456;}
+		.genericpanel {
+			background-color: #456789;
+			border: none;
+			padding: 20px 20px;
+			font-family: Verdana;
+			font-size: 15px;
+			transform: translate(-50%, -50%)
+		}
+
+		.genericpanel:hover{
+			filter: brightness(85%)
+		}
+
+		.genericpanel:focus{
+			filter: brightness(115%);
+			outline: none
+		}
+	</style>
+</head>
+<body>
+
+	<div id="root"></div> 
+	
+</body>
+<script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+<script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
+<script type="text/babel">
+	class Panel extends React.Component {
+		render() {
+			return (
+				<button className="genericpanel" id={this.props.node}  style={{position: this.props.position, top: this.props.top + "%", left: this.props.left + "%", backgroundColor: this.props.color}}>
+					{this.props.node}
+				</button>
+			);
+		}
+	}
+
+	class Page extends React.Component {
+		render(){
+			return (
+				<React.Fragment>
+					<Panel node={"seti-node1/0"} top={30} left={25} position={"fixed"} color={"#456789"}/>
+					<Panel node={"seti-node1/1"} top={30} left={35} position={"fixed"} color={"#987654"}/>
+
+					<Panel node={"seti-node2/0"} top={30} left={65} position={"fixed"} color={"#456789"}/>
+					<Panel node={"seti-node2/1"} top={30} left={75} position={"fixed"} color={"#987654"}/>
+
+					<Panel node={"seti-node3/0"} top={60} left={25} position={"fixed"} color={"#456789"}/>
+					<Panel node={"seti-node3/1"} top={60} left={35} position={"fixed"} color={"#987654"}/>
+
+					<Panel node={"seti-node4/0"} top={60} left={65} position={"fixed"} color={"#456789"}/>
+					<Panel node={"seti-node4/1"} top={60} left={75} position={"fixed"} color={"#987654"}/>
+				</React.Fragment>
+			);
+		}
+	}
+
+
+
+
+	
+	ReactDOM.render(<Page />, document.getElementById('root'))	
+
+</script>
+</html>
