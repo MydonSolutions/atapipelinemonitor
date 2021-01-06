@@ -1,0 +1,58 @@
+<html>
+	<head>
+		<title>
+			ATA Pipeline Monitor
+		</title>
+	</head>
+
+	<style>
+		body {
+			background-color: #222
+		}
+	</style>
+
+	<body>
+		<div id="infokeys" style="display: inline-block; positon: fixed; top: 0%; left: 0%; width: 20%; height: 100%; color: #eee; font-size: 15px; font-family: 'Courier'">
+		</div>
+	
+		<div id="infovals" style="display: inline-block; positon: fixed; top: 0%; left: 40%; width: 50%; height: 100%; color: #eee; font-size: 15px; font-family: 'Courier'">
+		</div>
+	</body>
+
+	<script>
+		function fetchAll(nodenum){
+			var req = new XMLHttpRequest
+			req.open("GET", "/getall?nodenum=" + nodenum)
+			req.send()
+
+			req.onreadystatechange = function(){
+				if (this.readyState == 4 && this.status == 200){
+					var text = req.responseText;
+					text = text.replace("[", "").replace("]", "").replace("{", "").replace("}", "")
+					items = text.split('","')
+						
+
+					var keystext = '';
+					var valstext = '';
+
+
+					for (var i = 0; i < items.length; i++){
+						var key = items[i].split('":"')[0].replaceAll('"', '')
+						var val = items[i].split('":"')[1].replaceAll('"', '')
+						keystext += key + "<br>"
+						valstext += val + "<br>"
+					}
+					
+					document.getElementById("infokeys").innerHTML = keystext
+					document.getElementById("infovals").innerHTML = valstext
+				}
+			}
+		}
+
+		params = new URLSearchParams(document.location.search)
+		console.log(params.get("nodenum"))
+		var nodenum = params.get("nodenum")
+		setInterval(function(){fetchAll(nodenum)}, 500)
+	</script>
+
+</html>
