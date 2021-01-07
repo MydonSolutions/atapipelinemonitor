@@ -22,6 +22,7 @@
 			filter: brightness(115%);
 			outline: none
 		}
+
 	</style>
 </head>
 <body>
@@ -41,10 +42,18 @@
 			
 		req.onreadystatechange = function(){
 			if (this.readyState == 4 && this.status == 200){
-				var text = req.responseText
-				var daqpulse = text.split(",")[0]
-				var synctime = text.split(",")[1]
-				var text = "<br></br>DAQPULSE " + daqpulse + "<br></br>" + "SYNCTIME " + synctime
+				var text = req.responseText.replace("[", "").replace("]", "")
+				text = text.replaceAll('null', '"null"')
+				console.log(text)
+				var daqpulse = text.split('","')[0].replace('"', '')
+				var synctime = text.split('","')[1]
+				var daqstate = text.split('","')[2]
+				var physgbps = text.split('","')[3]
+				var antnames = text.split('","')[4]
+				var obsndrop = text.split('","')[5].replace('"', '')
+
+				var text = "<br></br>DAQPULSE " + daqpulse + "<br></br>SYNCTIME " + synctime + "<br></br>DAQSTATE " + daqstate
+				text += "<br></br>PHYSGBPS " + physgbps + "<br></br>ANTNAMES " + antnames + "<br></br>OBSNDROP " + obsndrop
 				document.getElementById(nodenum + "_basics").innerHTML = text
 			}
 		}
@@ -54,8 +63,8 @@
 		render() {
 			return (
 				<form action="/node">
-				<button className="genericpanel" id={"seti-node" + this.props.nodenum/10 + "/" + this.props.nodenum % 10}  style={{position: this.props.position, top: this.props.top + "%", left: this.props.left + "%", backgroundColor: this.props.color, fontFamily: 'Courier', textAlign: 'left'}}>
-					seti-node{Math.floor(this.props.nodenum/10)}/{this.props.nodenum%10}
+				<button className="genericpanel" id={"seti-node" + this.props.nodenum/10 + "/" + this.props.nodenum % 10}  style={{position: this.props.position, top: this.props.top + "%", left: this.props.left + "%", backgroundColor: this.props.color, fontFamily: 'Courier', textAlign: 'left', lineHeight: "7px"}}>
+					<b>seti-node{Math.floor(this.props.nodenum/10)}/{this.props.nodenum%10}</b>
 					<span id={this.props.nodenum + "_basics"}></span>
 				</button>
 				<input type="hidden" name="nodenum" value={this.props.nodenum}></input>
@@ -98,6 +107,13 @@
 	setInterval(function(){ fetchBasics(31)}, 100)
 	setInterval(function(){ fetchBasics(40)}, 100)
 	setInterval(function(){ fetchBasics(41)}, 100)
+
+
+	setInterval(function(){
+		var ping = new XMLHttpRequest;
+		ping.open("GET", "/ping")
+		ping.send()
+	}, 10000)
 
 </script>
 </html>

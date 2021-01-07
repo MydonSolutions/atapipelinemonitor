@@ -32,8 +32,8 @@ app.get("/basics", (req, res) => {
 	var nodenum = urlParams.get("nodenum")
 	var nodename = "hashpipe://seti-node" + nodenum[0] + "/" + nodenum[1] + "/status"
 
-	client.hmget(nodename, "DAQPULSE", "SYNCTIME", function(err, reply){
-		res.send(reply.toString().replace("[", "").replace("]", ""))
+	client.hmget(nodename, "DAQPULSE", "SYNCTIME", "DAQSTATE", "PHYSGBPS", "ANTNAMES", "OBSNDROP", function(err, reply){
+		res.send(reply)
 	});
 })
 
@@ -47,6 +47,12 @@ app.get("/getall", (req, res) => {
 	client.hgetall(nodename, function(err, reply){
 		res.send(reply)
 	})
+})
+
+app.get('/ping', (req, res) => {
+        const ip = req.connection.remoteAddress;
+        console.log("Ping at ", new Date(new Date().toUTCString()), " from ", ip)
+        res.send('pong')
 })
 
 app.listen(port, host)

@@ -7,16 +7,55 @@
 
 	<style>
 		body {
-			background-color: #222
+			background-color: #222;
+		}
+
+		div:nth-child(odd) {
+			color: #999;
+		}
+
+		.infodiv{
+			font-size: 18px;
+			overflow: visible;
+			display: table-cell;
+			position: fixed;
+		}
+
+		input[type=Submit]:focus{
+			outline: none;
+			filter: brightness(150%);
+		}
+
+		input[type=Submit]:hover{
+			filter: brightness(80%);
 		}
 	</style>
 
 	<body>
-		<div id="infokeys" style="display: inline-block; positon: fixed; top: 0%; left: 0%; width: 20%; height: 100%; color: #eee; font-size: 15px; font-family: 'Courier'">
+		<div id="infokeys1" class="infodiv" style="top: 0%; left: 0%; width: 10%; height: 20%; color: #eee;  font-family: 'Courier'">
 		</div>
 	
-		<div id="infovals" style="display: inline-block; positon: fixed; top: 0%; left: 40%; width: 50%; height: 100%; color: #eee; font-size: 15px; font-family: 'Courier'">
+		<div id="infovals1" class="infodiv" style="top: 0%; left: 10%; width: 23%; height: 20%; color: #eee;  font-family: 'Courier'">
 		</div>
+
+
+		<div id="infokeys2" class="infodiv" style="top: 0%; left: 33%; width: 10%; height: 20%; color: #eee;  font-family: 'Courier'">
+		</div>
+
+		<div id="infovals2" class="infodiv" style="top: 0%; left: 43%; width: 24%; height: 20%; color: #eee;  font-family: 'Courier'">
+		</div>
+
+
+		<div id="infokeys3" class="infodiv" style="top: 0%; left: 64%; width: 10%; height: 20%; color: #eee;  font-family: 'Courier'">
+		</div>
+
+		<div id="infovals3" class="infodiv" style="top: 0%; left: 74%; width: 20%; height: 20%; color: #eee;  font-family: 'Courier'">
+		</div>
+
+		<form action="/" style="position: fixed; left: 1%; top: 90%">
+			<input type="Submit" value="<< Home" style="background-color: #111; padding: 10px 10px;  font-family: Courier; border: none; color: #aad">
+		</form>
+
 	</body>
 
 	<script>
@@ -32,19 +71,31 @@
 					items = text.split('","')
 						
 
-					var keystext = '';
-					var valstext = '';
+					keystext1 = '';
+					valstext1 = '';
+
+					keystext2 = '';
+					valstext2 = '';
+
+					keystext3 = '';
+					valstext3 = '';
 
 
 					for (var i = 0; i < items.length; i++){
+						if (i > 110000){
+							break
+						}
 						var key = items[i].split('":"')[0].replaceAll('"', '')
 						var val = items[i].split('":"')[1].replaceAll('"', '')
-						keystext += key + "<br>"
-						valstext += val + "<br>"
+						console.log(key, val)
+						window["keystext" + ((i%3 + 1) % 3 + 1)] += "<div>" + key + "</div>"
+						window["valstext" + ((i%3 + 1) % 3 + 1)] += "<div>" + val + "</div>"
 					}
-					
-					document.getElementById("infokeys").innerHTML = keystext
-					document.getElementById("infovals").innerHTML = valstext
+
+					for (var i = 1; i <= 3; i++){
+						document.getElementById("infokeys" + i).innerHTML = window["keystext" + i]
+						document.getElementById("infovals" + i).innerHTML = window["valstext" + i]
+					}
 				}
 			}
 		}
@@ -52,7 +103,16 @@
 		params = new URLSearchParams(document.location.search)
 		console.log(params.get("nodenum"))
 		var nodenum = params.get("nodenum")
-		setInterval(function(){fetchAll(nodenum)}, 500)
+		setInterval(function(){fetchAll(nodenum)}, 500 )
+
+
+        	setInterval(function(){
+                	var ping = new XMLHttpRequest;
+                	ping.open("GET", "/ping")
+                	ping.send()
+        	}, 10000)
+
 	</script>
+
 
 </html>
