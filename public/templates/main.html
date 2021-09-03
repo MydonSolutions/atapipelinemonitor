@@ -44,16 +44,30 @@
 			if (this.readyState == 4 && this.status == 200){
 				var text = req.responseText.replace("[", "").replace("]", "")
 				text = text.replaceAll('null', '"null"')
-				console.log(text)
-				var daqpulse = text.split('","')[0].replace('"', '')
-				var synctime = text.split('","')[1]
-				var daqstate = text.split('","')[2]
-				var physgbps = text.split('","')[3]
-				var antnames = text.split('","')[4]
-				var obsndrop = text.split('","')[5].replace('"', '')
 
-				var text = "<br></br>DAQPULSE " + daqpulse + "<br></br>SYNCTIME " + synctime + "<br></br>DAQSTATE " + daqstate
-				text += "<br></br>PHYSGBPS " + physgbps + "<br></br>ANTNAMES " + antnames + "<br></br>OBSNDROP " + obsndrop
+				var spl = text.split('","')
+				var daqpulse = spl[0].replace('"', '')
+				var synctime = spl[1]
+				var daqstate = spl[2]
+				var physgbps = spl[3]
+				var ibvgbps  = spl[4]
+				var antnames = spl[5]
+				var obsndrop = spl[6].replace('"', '')
+				var ppstatus = spl[7]
+				var postproc = spl[8].replace('"', '')
+				var obsinfo = spl[9].replace('"', '')
+
+				var text = "<br></br>"
+				text += "DAQPULSE " + daqpulse + "<br></br>"
+				text += "SYNCTIME " + synctime + "<br></br>"
+				text += "DAQSTATE " + daqstate + "<br></br>"
+				text += "PHYSGBPS " + physgbps + "<br></br>"
+				text += "IBVGBPS&nbsp;&nbsp;" + ibvgbps  + "<br></br>"
+				text += "ANTNAMES " + antnames + "<br></br>"
+				text += "OBSNDROP " + obsndrop + "<br></br>"
+				text += "PPSTATUS " + ppstatus + "<br></br>"
+				text += "POSTPROC " + postproc + "<br></br>"
+				text += "OBSINFO&nbsp;&nbsp;" + obsinfo
 				document.getElementById(nodenum + "_basics").innerHTML = text
 			}
 		}

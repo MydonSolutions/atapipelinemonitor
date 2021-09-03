@@ -32,7 +32,7 @@ app.get("/basics", (req, res) => {
 	var nodenum = urlParams.get("nodenum")
 	var nodename = "hashpipe://seti-node" + nodenum[0] + "/" + nodenum[1] + "/status"
 
-	client.hmget(nodename, "DAQPULSE", "SYNCTIME", "DAQSTATE", "PHYSGBPS", "ANTNAMES", "OBSNDROP", function(err, reply){
+	client.hmget(nodename, "DAQPULSE", "SYNCTIME", "DAQSTATE", "PHYSGBPS", "IBVGBPS", "ANTNAMES", "OBSNDROP", "PPSTATUS", "POSTPROC", "OBSINFO", function(err, reply){
 		res.send(reply)
 	});
 })
