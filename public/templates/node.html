@@ -59,9 +59,9 @@
 	</body>
 
 	<script>
-		function fetchAll(nodenum){
+		function fetchAll(nodenum, instancenum){
 			var req = new XMLHttpRequest
-			req.open("GET", "/getall?nodenum=" + nodenum)
+			req.open("GET", "/getall?nodenum=" + nodenum + "&instancenum=" + instancenum)
 			req.send()
 
 			req.onreadystatechange = function(){
@@ -101,9 +101,11 @@
 		}
 
 		params = new URLSearchParams(document.location.search)
-		console.log(params.get("nodenum"))
 		var nodenum = params.get("nodenum")
-		setInterval(function(){fetchAll(nodenum)}, 500 )
+		var instancenum = params.get("instancenum")
+		console.log(nodenum, instancenum)
+		fetchAll(nodenum, instancenum)
+		setInterval(function(){fetchAll(nodenum, instancenum)}, 500 )
 
 
         	setInterval(function(){

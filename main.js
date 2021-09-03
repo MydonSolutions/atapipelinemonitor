@@ -30,7 +30,8 @@ app.get("/basics", (req, res) => {
 	urlParams = new URLSearchParams(url)
 
 	var nodenum = urlParams.get("nodenum")
-	var nodename = "hashpipe://seti-node" + nodenum[0] + "/" + nodenum[1] + "/status"
+	var instancenum = urlParams.get("instancenum")
+	var nodename = "hashpipe://seti-node" + nodenum + "/" + instancenum + "/status"
 
 	client.hmget(nodename, "DAQPULSE", "SYNCTIME", "DAQSTATE", "PHYSGBPS", "IBVGBPS", "ANTNAMES", "OBSNDROP", "PPSTATUS", "POSTPROC", "OBSINFO", function(err, reply){
 		res.send(reply)
@@ -42,7 +43,8 @@ app.get("/getall", (req, res) => {
 	urlParams = new URLSearchParams(url)
 
 	var nodenum = urlParams.get("nodenum")
-	var nodename = "hashpipe://seti-node" + nodenum[0] + "/" + nodenum[1] + "/status"
+	var instancenum = urlParams.get("instancenum")
+	var nodename = "hashpipe://seti-node" + nodenum + "/" + instancenum + "/status"
 
 	client.hgetall(nodename, function(err, reply){
 		res.send(reply)
