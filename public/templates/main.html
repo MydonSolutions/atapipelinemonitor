@@ -90,33 +90,38 @@
 		render(){
 			return (
 				<React.Fragment>
-					<Panel nodenum={1} instancenum={0} top={30} left={15} position={"fixed"} color={"#456789"}/>
-					<Panel nodenum={2} instancenum={0} top={30} left={36.66} position={"fixed"} color={"#987654"}/>
-
-					<Panel nodenum={3} instancenum={0} top={30} left={63.33} position={"fixed"} color={"#456789"}/>
-					<Panel nodenum={4} instancenum={0} top={30} left={85} position={"fixed"} color={"#987654"}/>
-
-					<Panel nodenum={1} instancenum={1} top={70} left={15} position={"fixed"} color={"#456789"}/>
-					<Panel nodenum={2} instancenum={1} top={70} left={36.66} position={"fixed"} color={"#987654"}/>
-
-					<Panel nodenum={3} instancenum={1} top={70} left={63.66} position={"fixed"} color={"#456789"}/>
-					<Panel nodenum={4} instancenum={1} top={70} left={85} position={"fixed"} color={"#987654"}/>
+					{this.props.nodeinstances.map(
+						(nodeinstance, index) => {
+							var nodenum = nodeinstance.nodenum;
+							var instancenum = nodeinstance.instancenum;
+							console.log(index, nodeinstance, this.props.rowtops[instancenum], this.props.collefts[nodenum-1], this.props.rowcolors[instancenum]);
+							setInterval(function(){ fetchBasics(nodenum,instancenum)}, 100)
+							return <Panel nodenum={nodenum} instancenum={instancenum} top={this.props.rowtops[instancenum]} left={this.props.collefts[nodenum-1]} position={"fixed"} color={this.props.rowcolors[instancenum]}/>
+						}
+					)}
 				</React.Fragment>
 			);
 		}
 	}
 
 
-	ReactDOM.render(<Page />, document.getElementById('root'))	
-
-	setInterval(function(){ fetchBasics(1, 0)}, 100)
-	setInterval(function(){ fetchBasics(1, 1)}, 100)
-	setInterval(function(){ fetchBasics(2, 0)}, 100)
-	setInterval(function(){ fetchBasics(2, 1)}, 100)
-	setInterval(function(){ fetchBasics(3, 0)}, 100)
-	setInterval(function(){ fetchBasics(3, 1)}, 100)
-	setInterval(function(){ fetchBasics(4, 0)}, 100)
-	setInterval(function(){ fetchBasics(4, 1)}, 100)
+	ReactDOM.render(<Page 
+			nodeinstances={[
+				{"nodenum":1, "instancenum":0},
+				{"nodenum":1, "instancenum":1},
+				{"nodenum":2, "instancenum":0},
+				{"nodenum":2, "instancenum":1},
+				{"nodenum":3, "instancenum":0},
+				{"nodenum":3, "instancenum":1},
+				{"nodenum":4, "instancenum":0},
+				{"nodenum":4, "instancenum":1},
+			]}
+			collefts={[15, 36.66, 63.66, 85]}
+			rowtops={[30, 70]}
+			rowcolors={["#456789", "#987654"]}
+		/>,
+		document.getElementById('root')
+	)
 
 
 	setInterval(function(){
