@@ -6,12 +6,13 @@
 	<style>
 		.page {
 			background-color: #123456;
-			display:"flex";
-			flex-direction:"column";
+			display: flex;
+			flex-direction: column;
 			position: absolute;
 		}
-		.panelrow{
+		.instancespanel{
 			display: flex;
+			/* flex-direction: column; */
 			justify-content: space-around;
 		}
 
@@ -89,7 +90,7 @@
 					}
 					document.getElementById(nodenum + "_" + instancenum + "_basics").innerHTML = text
 				}
-			)}, 500)
+			)}, 1000)
 		}
 
 		componentWillUnMount() {
@@ -114,10 +115,10 @@
 		}
 	}
 
-	class PanelRow extends React.Component {
+	class InstancesPanel extends React.Component {
 		render(){
 			return (
-				<div className="panelrow">
+				<div className="instancespanel">
 					<React.Fragment>
 						{this.props.nodenums.map(
 							(nodenum, index) => {
@@ -136,11 +137,13 @@
 			return (
 				<div className="page">
 					<React.Fragment>{
-						this.props.instance_nodenums.map((instance_nodenums, instancenum) =>{
-							return <PanelRow 
-								key={"PanelRow_" + instancenum}
+						this.props.instance_nodenums_dicts.map((instance_nodenums, index) =>{
+							let instancenum = instance_nodenums["instancenum"]
+							let nodenums = instance_nodenums["nodenums"]
+							return <InstancesPanel 
+								key={"InstancesPanel_" + index}
 								instancenum={instancenum}
-								nodenums={instance_nodenums}
+								nodenums={nodenums}
 								rowcolors={this.props.rowcolors}
 							/>
 						})
@@ -150,14 +153,14 @@
 			);
 		}
 	}
-
-	let instance_nodenums= [
-				[1,2,3,4,5,6,7,8],
-				[1,2,3,4,5,6,7,8],
-			]
 	
 	ReactDOM.render(<Page 
-			instance_nodenums={instance_nodenums}
+			instance_nodenums_dicts={[
+				{"instancenum":0, "nodenums":[1,2,3,4]},
+				{"instancenum":1, "nodenums":[1,2,3,4]},
+				{"instancenum":0, "nodenums":[5,6,7,8]},
+				{"instancenum":1, "nodenums":[5,6,7,8]},
+			]}
 			rowcolors={["#456789", "#987654"]}
 		/>,
 		document.getElementById('root')
