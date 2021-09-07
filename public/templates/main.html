@@ -9,6 +9,10 @@
 			display: flex;
 			flex-direction: column;
 			position: absolute;
+			min-width: 100%;
+			min-height: 100%;
+			top: 0;
+			left: 0;
 		}
 		.instancespanel{
 			display: flex;
@@ -80,6 +84,15 @@
 	}
 	
 	class Panel extends React.Component {
+		constructor(props) {
+			super(props)
+			this.state = {
+				nodenum: props.nodenum,
+				instancenum: props.instancenum,
+				backgroundColor: props.color
+			}
+		}
+
 		componentDidMount() {
 			let nodenum = this.props.nodenum;
 			let instancenum = this.props.instancenum;
@@ -105,13 +118,13 @@
 				<a className="panel" href={"/node?nodenum="+this.state.nodenum+"&instancenum="+this.state.instancenum}>
 					<div 
 						className="genericpanel" 
-						id={"seti-node" + this.props.nodenum + "/" + this.props.instancenum}  
+						id={"seti-node" + this.state.nodenum + "/" + this.state.instancenum}  
 						style={{
-							backgroundColor: this.props.color
+							backgroundColor: this.state.backgroundColor
 						}}
 					>
-						<b>seti-node{Math.floor(this.props.nodenum)}/{this.props.instancenum}</b>
-						<span id={this.props.nodenum + "_" + this.props.instancenum + "_basics"}></span>
+						<b>seti-node{Math.floor(this.state.nodenum)}/{this.state.instancenum}</b>
+						<span id={this.state.nodenum + "_" + this.state.instancenum + "_basics"}></span>
 					</div>
 				</a>
 			);
