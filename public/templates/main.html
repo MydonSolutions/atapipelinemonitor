@@ -33,6 +33,9 @@
 			filter: brightness(115%);
 		}
 
+		a.panel {
+			text-decoration: none;
+		}
 	</style>
 </head>
 <body>
@@ -99,7 +102,7 @@
 
 		render() {
 			return (
-				<a href={"/node?nodenum="+this.props.nodenum+"&instancenum="+this.props.instancenum}>
+				<a className="panel" href={"/node?nodenum="+this.state.nodenum+"&instancenum="+this.state.instancenum}>
 					<div 
 						className="genericpanel" 
 						id={"seti-node" + this.props.nodenum + "/" + this.props.instancenum}  
