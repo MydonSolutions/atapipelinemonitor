@@ -74,9 +74,6 @@
 	
 	function fetchBasicsCallback(nodenum, instancenum, callbackFunc){
 		let req = new XMLHttpRequest;
-		req.open("GET", "/basics?nodenum=" + nodenum + "&instancenum=" + instancenum)
-		req.send()
-		
 		req.onreadystatechange = function(){
 			let keyvalues = null;
 			if (this.readyState == 4 && this.status == 200){
@@ -98,9 +95,11 @@
 					POSTPROC: spl[8].replace('"', ''),
 					OBSINFO:  spl[9].replace('"', '')
 				}
+				callbackFunc(keyvalues);
 			}
-			callbackFunc(keyvalues);
 		}
+		req.open("GET", "/basics?nodenum=" + nodenum + "&instancenum=" + instancenum)
+		req.send()
 	}
 	
 	class Panel extends React.Component {
