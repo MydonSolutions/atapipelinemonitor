@@ -140,16 +140,19 @@
 				const nodenum = this.props.nodenums[index];
 				node_keyvalues[nodenum] = {keys:[], values:{}};
 			}
-			// console.log(node_keyvalues)
+			const updatePeriod = Math.floor(this.props.updatePeriod/this.props.nodenums.length);
+			console.log(updatePeriod)
 			this.state = {
 				instancenum: this.props.instancenum,
 				nodenums: this.props.nodenums,
-				node_keyvalues: node_keyvalues
+				node_keyvalues: node_keyvalues,
+				updatePeriod: updatePeriod
 			}
 		}
 
-		setkeyvalues_fornode(nodenum, keyvalues) {
+		setKeyValuesForNode(index, keyvalues) {
 			const nodenums = this.state.nodenums;
+			const nodenum = nodenums[index];
 			const instancenum = this.state.instancenum;
 			let node_keyvalues = this.state.node_keyvalues;
 			let node_new_keyvalues = {keys:[], values:keyvalues};
@@ -161,24 +164,27 @@
 				instancenum: instancenum,
 				nodenums: nodenums,
 				node_keyvalues: node_keyvalues,
+				updatePeriod: this.state.updatePeriod
 			})
 		}
 
+		setKeyValuesForNodeThenNext(index, keyvalues){
+			this.setKeyValuesForNode(index, keyvalues);
+			index = (index + 1) % this.state.nodenums.length;
+			this.timer = setTimeout(()=>{
+				fetchBasicsCallback(
+					this.state.nodenums[index],
+					this.state.instancenum, 
+					(keyvalues) => {this.setKeyValuesForNodeThenNext(index, keyvalues)}
+				)
+			}, this.state.updatePeriod)
+		}
+
 		componentDidMount() {
-			this.fetchBasicsTimer = setInterval(()=>{
-					for (let index = 0; index < this.state.nodenums.length; index++) {
-					const nodenum = this.state.nodenums[index];
-					fetchBasicsCallback(
-						nodenum,
-						this.state.instancenum, 
-						(keyvalues) => {this.setkeyvalues_fornode(nodenum, keyvalues)}
-					)		
-				}
-			}, 1000)
+			this.setKeyValuesForNodeThenNext(this.state.nodenums.length-1, {})
 		}
 
 		componentWillUnMount() {
-			clearInterval(this.timer);
 		}
 
 		render(){
@@ -216,6 +222,7 @@
 								instancenum={instancenum}
 								nodenums={nodenums}
 								rowcolors={this.props.rowcolors}
+								updatePeriod={400}
 							/>
 						})
 					}
