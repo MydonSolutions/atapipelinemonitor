@@ -4,23 +4,32 @@
 	<meta charset="UTF-8">
 	<title>ATA Pipeline Monitor</title>
 	<style>
-		body {background-color: #123456;}
+		.page {
+			background-color: #123456;
+			display:"flex";
+			flex-direction:"column";
+			position: absolute;
+		}
+		.panelrow{
+			display: flex;
+			justify-content: space-around;
+		}
+
 		.genericpanel {
-			background-color: #456789;
+			color: #FFFFFF;
+			min-width: 300px;
+			min-height: 200px;
 			border: none;
+			margin: 20px;
 			padding: 20px 20px;
-			font-family: Verdana;
-			font-size: 13px;
-			transform: translate(-50%, -50%)
+			font-family: 'Courier';
+			font-size: 14px;
+			text-align: 'left';
+			line-height: 7px;
 		}
 
 		.genericpanel:hover{
-			filter: brightness(85%)
-		}
-
-		.genericpanel:focus{
 			filter: brightness(115%);
-			outline: none
 		}
 
 	</style>
@@ -87,7 +96,13 @@
 		render() {
 			return (
 				<a href={"/node?nodenum="+this.props.nodenum+"&instancenum="+this.props.instancenum}>
-					<div className="genericpanel" id={"seti-node" + this.props.nodenum + "/" + this.props.instancenum}  style={{position: this.props.position, top: this.props.top + "%", left: this.props.left + "%", backgroundColor: this.props.color, fontFamily: 'Courier', textAlign: 'left', lineHeight: "7px"}}>
+					<div 
+						className="genericpanel" 
+						id={"seti-node" + this.props.nodenum + "/" + this.props.instancenum}  
+						style={{
+							backgroundColor: this.props.color
+						}}
+					>
 						<b>seti-node{Math.floor(this.props.nodenum)}/{this.props.instancenum}</b>
 						<span id={this.props.nodenum + "_" + this.props.instancenum + "_basics"}></span>
 					</div>
@@ -99,14 +114,16 @@
 	class PanelRow extends React.Component {
 		render(){
 			return (
-				<React.Fragment>
-					{this.props.nodenums.map(
-						(nodenum, index) => {
-							console.log(index, this.props.rowtops[this.props.instancenum], this.props.collefts[(nodenum-1)%4], this.props.rowcolors[this.props.instancenum]);
-							return <Panel key={"Panel_" + nodenum + "_" + this.props.instancenum} nodenum={nodenum} instancenum={this.props.instancenum} top={this.props.rowtops[this.props.instancenum]} left={this.props.collefts[(nodenum-1)%4]} position={"fixed"} color={this.props.rowcolors[this.props.instancenum]}/>
-						}
-					)}
-				</React.Fragment>
+				<div className="panelrow">
+					<React.Fragment>
+						{this.props.nodenums.map(
+							(nodenum, index) => {
+								// console.log(index, this.props.rowtops[this.props.instancenum], this.props.collefts[(nodenum-1)%4], this.props.rowcolors[this.props.instancenum]);
+								return <Panel key={"Panel_" + nodenum + "_" + this.props.instancenum} nodenum={nodenum} instancenum={this.props.instancenum} color={this.props.rowcolors[this.props.instancenum]}/>
+							}
+						)}
+					</React.Fragment>
+				</div>
 			);
 		}
 	}
@@ -114,32 +131,30 @@
 	class Page extends React.Component {
 		render(){
 			return (
-				<React.Fragment>{
-					this.props.instance_nodenums.map((instance_nodenums, instancenum) =>{
-						return <PanelRow 
-							key={"PanelRow_" + instancenum}
-							instancenum={instancenum}
-							nodenums={instance_nodenums} 
-							collefts={this.props.collefts}
-							rowtops={this.props.rowtops}
-							rowcolors={this.props.rowcolors}
-						/>
-					})
-				}
-				</React.Fragment>
+				<div className="page">
+					<React.Fragment>{
+						this.props.instance_nodenums.map((instance_nodenums, instancenum) =>{
+							return <PanelRow 
+								key={"PanelRow_" + instancenum}
+								instancenum={instancenum}
+								nodenums={instance_nodenums}
+								rowcolors={this.props.rowcolors}
+							/>
+						})
+					}
+					</React.Fragment>
+				</div>
 			);
 		}
 	}
 
 	let instance_nodenums= [
-				[5,6,7,8],
-				[5,6,7,8],
+				[1,2,3,4,5,6,7,8],
+				[1,2,3,4,5,6,7,8],
 			]
 	
 	ReactDOM.render(<Page 
 			instance_nodenums={instance_nodenums}
-			collefts={[15, 36.66, 63.66, 85]}
-			rowtops={[30, 70]}
 			rowcolors={["#456789", "#987654"]}
 		/>,
 		document.getElementById('root')
