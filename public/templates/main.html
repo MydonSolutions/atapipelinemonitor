@@ -22,23 +22,43 @@
 
 		.genericpanel {
 			color: #FFFFFF;
-			min-width: 300px;
+			width: 300px;
 			min-height: 200px;
-			border: none;
-			margin: 20px;
+			border: 1px solid black;
+			border-radius: 5px;
+			margin: 10px;
 			padding: 20px 20px;
 			font-family: 'Courier';
 			font-size: 14px;
 			text-align: 'left';
-			line-height: 7px;
+			line-height: 50%;
 		}
-
 		.genericpanel:hover{
 			filter: brightness(115%);
 		}
 
 		a.panel {
 			text-decoration: none;
+		}
+
+		.keyvalues {
+			padding: 0px 2px 4px;
+		}
+		.keyvalue {
+			display: flex;
+			font-family: 'Courier';
+			font-size: 14px;
+			text-align: 'left';
+			line-height: 100%;
+			
+			margin: 3px 0px 4px;
+			padding: 2px;
+		}
+		.key {
+			min-width: 9ch;
+		}
+		.value {
+			text-align: 'left';
 		}
 	</style>
 </head>
@@ -84,47 +104,28 @@
 	}
 	
 	class Panel extends React.Component {
-		constructor(props) {
-			super(props)
-			this.state = {
-				nodenum: props.nodenum,
-				instancenum: props.instancenum,
-				backgroundColor: props.color
-			}
-		}
-
-		componentDidMount() {
-			let nodenum = this.props.nodenum;
-			let instancenum = this.props.instancenum;
-			this.fetchBasicsTimer = setInterval(function(){fetchBasicsCallback(
-				nodenum,
-				instancenum, 
-				(keyvalues) => {
-					let text = "<br></br>"
-					for (let key in keyvalues){
-						text += key.padEnd(10) + keyvalues[key] + "<br></br>" 
-					}
-					document.getElementById(nodenum + "_" + instancenum + "_basics").innerHTML = text
-				}
-			)}, 1000)
-		}
-
-		componentWillUnMount() {
-			clearInterval(this.fetchBasicsTimer);
-		}
-
 		render() {
 			return (
-				<a className="panel" href={"/node?nodenum="+this.state.nodenum+"&instancenum="+this.state.instancenum}>
+				<a className="panel" href={"/node?nodenum="+this.props.nodenum+"&instancenum="+this.props.instancenum}>
 					<div 
 						className="genericpanel" 
-						id={"seti-node" + this.state.nodenum + "/" + this.state.instancenum}  
+						id={"seti-node" + this.props.nodenum + "/" + this.props.instancenum}  
 						style={{
-							backgroundColor: this.state.backgroundColor
+							backgroundColor: this.props.color
 						}}
 					>
-						<b>seti-node{Math.floor(this.state.nodenum)}/{this.state.instancenum}</b>
-						<span id={this.state.nodenum + "_" + this.state.instancenum + "_basics"}></span>
+						<b>seti-node{Math.floor(this.props.nodenum)}/{this.props.instancenum}</b>
+						<div className="keyvalues" id={this.props.nodenum + "_" + this.props.instancenum + "_basics"}>
+							<React.Fragment>
+								{
+									this.props.keys.map((key, keyindex)=>{
+										return <div key={this.props.nodenum + "_" + this.props.instancenum + "_" + keyindex} className="keyvalue">
+												<div className="key">{key}</div> <div className="value">{this.props.values[key]}</div>
+											</div>
+									})
+								}
+							</React.Fragment>
+						</div>
 					</div>
 				</a>
 			);
@@ -132,14 +133,68 @@
 	}
 
 	class InstancesPanel extends React.Component {
+		constructor(props) {
+			super(props);
+			let node_keyvalues = {};
+			for (let index = 0; index < this.props.nodenums.length; index++) {
+				const nodenum = this.props.nodenums[index];
+				node_keyvalues[nodenum] = {keys:[], values:{}};
+			}
+			// console.log(node_keyvalues)
+			this.state = {
+				instancenum: this.props.instancenum,
+				nodenums: this.props.nodenums,
+				node_keyvalues: node_keyvalues
+			}
+		}
+
+		setkeyvalues_fornode(nodenum, keyvalues) {
+			const nodenums = this.state.nodenums;
+			const instancenum = this.state.instancenum;
+			let node_keyvalues = this.state.node_keyvalues;
+			let node_new_keyvalues = {keys:[], values:keyvalues};
+			for(let key in keyvalues){
+				node_new_keyvalues["keys"] = node_new_keyvalues["keys"].concat([key]);
+			}
+			node_keyvalues[nodenum] = node_new_keyvalues;
+			this.setState({
+				instancenum: instancenum,
+				nodenums: nodenums,
+				node_keyvalues: node_keyvalues,
+			})
+		}
+
+		componentDidMount() {
+			this.fetchBasicsTimer = setInterval(()=>{
+					for (let index = 0; index < this.state.nodenums.length; index++) {
+					const nodenum = this.state.nodenums[index];
+					fetchBasicsCallback(
+						nodenum,
+						this.state.instancenum, 
+						(keyvalues) => {this.setkeyvalues_fornode(nodenum, keyvalues)}
+					)		
+				}
+			}, 1000)
+		}
+
+		componentWillUnMount() {
+			clearInterval(this.timer);
+		}
+
 		render(){
 			return (
 				<div className="instancespanel">
 					<React.Fragment>
-						{this.props.nodenums.map(
+						{this.state.nodenums.map(
 							(nodenum, index) => {
-								// console.log(index, this.props.rowtops[this.props.instancenum], this.props.collefts[(nodenum-1)%4], this.props.rowcolors[this.props.instancenum]);
-								return <Panel key={"Panel_" + nodenum + "_" + this.props.instancenum} nodenum={nodenum} instancenum={this.props.instancenum} color={this.props.rowcolors[this.props.instancenum]}/>
+								return <Panel 
+									key={"Panel_" + nodenum + "_" + this.state.instancenum}
+									nodenum={nodenum}
+									instancenum={this.state.instancenum}
+									color={this.props.rowcolors[this.state.instancenum]}
+									keys={this.state.node_keyvalues[nodenum]["keys"]}
+									values={this.state.node_keyvalues[nodenum]["values"]}
+								/>
 							}
 						)}
 					</React.Fragment>
