@@ -24,7 +24,6 @@
 			color: #FFFFFF;
 			width: 300px;
 			min-height: 200px;
-			border: 1px solid black;
 			border-radius: 5px;
 			margin: 10px;
 			padding: 20px 20px;
@@ -110,7 +109,8 @@
 						className="genericpanel" 
 						id={"seti-node" + this.props.nodenum + "/" + this.props.instancenum}  
 						style={{
-							backgroundColor: this.props.color
+							backgroundColor: this.props.color,
+							border: "2px solid " + this.props.bordercolor
 						}}
 					>
 						<b>seti-node{Math.floor(this.props.nodenum)}/{this.props.instancenum}</b>
@@ -194,6 +194,7 @@
 									nodenum={nodenum}
 									instancenum={this.state.instancenum}
 									color={this.props.rowcolors[this.state.instancenum]}
+									bordercolor={this.props.nodecolors[index]}
 									keys={this.state.node_keyvalues[nodenum]["keys"]}
 									values={this.state.node_keyvalues[nodenum]["values"]}
 								/>
@@ -206,18 +207,67 @@
 	}
 
 	class Page extends React.Component {
+		constructor(props) {
+			super(props)
+			this.props.instance_nodenums_dicts.map((instance_nodenums, index) =>{
+				let instancenum = instance_nodenums["instancenum"]
+				let nodenums = instance_nodenums["nodenums"]
+				let nodecolors = []
+				for (let index = 0; index < nodenums.length; index++) {
+					let rgb = this.HSVtoRGB(nodenums[index]/this.props.node_count, 0.6, 0.8)
+					nodecolors = nodecolors.concat(["rgb(" + rgb.r + "," + rgb.g + "," + rgb.b + ")"])
+				}
+				this.props.instance_nodenums_dicts[index]["nodecolors"] = nodecolors
+			})
+			this.state = {
+				instance_nodenums_dicts: this.props.instance_nodenums_dicts,
+				rowcolors: this.props.rowcolors,
+				node_count: this.props.node_count
+			}
+		}
+
+		/* https://stackoverflow.com/a/17243070 
+		* accepts parameters
+		* h  Object = {h:x, s:y, v:z}
+		* OR 
+		* h, s, v
+		*/
+		HSVtoRGB(h, s, v) {
+				var r, g, b, i, f, p, q, t;
+				if (arguments.length === 1) {
+						s = h.s, v = h.v, h = h.h;
+				}
+				i = Math.floor(h * 6);
+				f = h * 6 - i;
+				p = v * (1 - s);
+				q = v * (1 - f * s);
+				t = v * (1 - (1 - f) * s);
+				switch (i % 6) {
+						case 0: r = v, g = t, b = p; break;
+						case 1: r = q, g = v, b = p; break;
+						case 2: r = p, g = v, b = t; break;
+						case 3: r = p, g = q, b = v; break;
+						case 4: r = t, g = p, b = v; break;
+						case 5: r = v, g = p, b = q; break;
+				}
+				return {
+						r: Math.round(r * 255),
+						g: Math.round(g * 255),
+						b: Math.round(b * 255)
+				};
+		}
+
 		render(){
 			return (
 				<div className="page">
 					<React.Fragment>{
-						this.props.instance_nodenums_dicts.map((instance_nodenums, index) =>{
-							let instancenum = instance_nodenums["instancenum"]
-							let nodenums = instance_nodenums["nodenums"]
+						this.state.instance_nodenums_dicts.map((instance_nodenums, index) =>{
 							return <InstancesPanel 
 								key={"InstancesPanel_" + index}
-								instancenum={instancenum}
-								nodenums={nodenums}
-								rowcolors={this.props.rowcolors}
+								instancenum={instance_nodenums["instancenum"]}
+								nodenums={instance_nodenums["nodenums"]}
+								nodecolors={instance_nodenums["nodecolors"]}
+								rowcolors={this.state.rowcolors}
 							/>
 						})
 					}
@@ -235,6 +285,7 @@
 				{"instancenum":1, "nodenums":[5,6,7,8]},
 			]}
 			rowcolors={["#456789", "#987654"]}
+			node_count={8}
 		/>,
 		document.getElementById('root')
 	)
