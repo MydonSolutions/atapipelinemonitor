@@ -139,13 +139,10 @@
 				const nodenum = this.props.nodenums[index];
 				node_keyvalues[nodenum] = {keys:[], values:{}};
 			}
-			const updatePeriod = Math.floor(this.props.updatePeriod/this.props.nodenums.length);
-			console.log(updatePeriod)
 			this.state = {
 				instancenum: this.props.instancenum,
 				nodenums: this.props.nodenums,
-				node_keyvalues: node_keyvalues,
-				updatePeriod: updatePeriod
+				node_keyvalues: node_keyvalues
 			}
 		}
 
@@ -162,25 +159,25 @@
 			this.setState({
 				instancenum: instancenum,
 				nodenums: nodenums,
-				node_keyvalues: node_keyvalues,
-				updatePeriod: this.state.updatePeriod
+				node_keyvalues: node_keyvalues
 			})
 		}
 
-		setKeyValuesForNodeThenNext(index, keyvalues){
+		setKeyValuesForNodeThenAgain(index, keyvalues){
 			this.setKeyValuesForNode(index, keyvalues);
 			index = (index + 1) % this.state.nodenums.length;
-			this.timer = setTimeout(()=>{
-				fetchBasicsCallback(
-					this.state.nodenums[index],
-					this.state.instancenum, 
-					(keyvalues) => {this.setKeyValuesForNodeThenNext(index, keyvalues)}
-				)
-			}, this.state.updatePeriod)
+			fetchBasicsCallback(
+				this.state.nodenums[index],
+				this.state.instancenum, 
+				(keyvalues) => {this.setKeyValuesForNodeThenAgain(index, keyvalues)}
+			)
 		}
 
 		componentDidMount() {
-			this.setKeyValuesForNodeThenNext(this.state.nodenums.length-1, {})
+			for (let index = 0; index < this.state.nodenums.length; index++) {
+				const element = this.state.nodenums[index];
+				this.setKeyValuesForNodeThenAgain(index, {})
+			}
 		}
 
 		componentWillUnMount() {
@@ -221,7 +218,6 @@
 								instancenum={instancenum}
 								nodenums={nodenums}
 								rowcolors={this.props.rowcolors}
-								updatePeriod={400}
 							/>
 						})
 					}
