@@ -67,27 +67,8 @@
 	function fetchBasicsCallback(nodenum, instancenum, callbackFunc){
 		let req = new XMLHttpRequest;
 		req.onreadystatechange = function(){
-			let keyvalues = null;
 			if (this.readyState == 4 && this.status == 200){
-				let text = req.responseText.replace("[", "").replace("]", "")
-				text = text.replaceAll('null', '"null"')
-
-				let spl = text.split('","')
-
-				keyvalues =
-				{
-					DAQPULSE: spl[0].replace('"', ''),
-					SYNCTIME: spl[1],
-					DAQSTATE: spl[2],
-					PHYSGBPS: spl[3],
-					IBVGBPS:  spl[4],
-					ANTNAMES: spl[5],
-					OBSNDROP: spl[6].replace('"', ''),
-					PPSTATUS: spl[7],
-					POSTPROC: spl[8].replace('"', ''),
-					OBSINFO:  spl[9].replace('"', '')
-				}
-				callbackFunc(keyvalues);
+				callbackFunc(JSON.parse(req.responseText));
 			}
 		}
 		req.open("GET", "/basics?nodenum=" + nodenum + "&instancenum=" + instancenum)
