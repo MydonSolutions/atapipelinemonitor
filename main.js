@@ -6,7 +6,7 @@ const redis = require("redis");
 const client = redis.createClient(6379, 'redishost');
 
 const app = express()
-const port = 8082
+const port = 8081
 const host = '0.0.0.0'
 
 let summary_keys = []
