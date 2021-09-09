@@ -6,15 +6,21 @@ const redis = require("redis");
 const client = redis.createClient(6379, 'redishost');
 
 const app = express()
-const port = 81
+const port = 8082
 const host = '0.0.0.0'
 
 let summary_keys = []
 fs.readFile('summary_keys.txt', (err, data) => {
 	if (err) throw err;
 	summary_keys = data.toString().split("\n")
-	console.log(summary_keys)
 })
+
+setInterval(function(){
+	fs.readFile('summary_keys.txt', (err, data) => {
+		if (err) throw err;
+		summary_keys = data.toString().split("\n")
+	})
+}, 5000)
 
 app.use(express.static('public'));
 
