@@ -4,25 +4,54 @@
 	<meta charset="UTF-8">
 	<title>ATA Pipeline Monitor</title>
 	<style>
-		body {background-color: #123456;}
+		.page {
+			background-color: #123456;
+			display: flex;
+			flex-direction: column;
+			justify-content: space-evenly;
+			position: absolute;
+			min-width: 100%;
+			min-height: 100%;
+			top: 0;
+			left: 0;
+		}
+		.instancespanel{
+			display: flex;
+			/* flex-direction: column; */
+			justify-content: space-evenly;
+		}
+
 		.genericpanel {
-			background-color: #456789;
-			border: none;
-			padding: 20px 20px;
-			font-family: Verdana;
-			font-size: 13px;
-			transform: translate(-50%, -50%)
+			color: #FFFFFF;
+			width: 300px;
+			min-height: 112px;
+			border-radius: 5px;
+			margin: 5px;
+			padding: 5px;
+			font-family: 'Courier';
+			font-size: 14px;
+			text-align: 'left';
 		}
-
 		.genericpanel:hover{
-			filter: brightness(85%)
-		}
-
-		.genericpanel:focus{
 			filter: brightness(115%);
-			outline: none
 		}
 
+		a.panel {
+			text-decoration: none;
+		}
+
+		.keyvalues {
+			padding: 0px 2px 4px;
+		}
+		.keyvalue {
+			display: flex;
+		}
+		.key {
+			min-width: 9ch;
+		}
+		.value {
+			text-align: 'left';
+		}
 	</style>
 </head>
 <body>
@@ -35,78 +64,206 @@
 <script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
 <script type="text/babel">
 	
-	function fetchBasics(nodenum){
-		var req = new XMLHttpRequest;
-		req.open("GET", "/basics?nodenum=" + nodenum)
-		req.send()
-			
+	function fetchBasicsCallback(nodenum, instancenum, callbackFunc){
+		let req = new XMLHttpRequest;
 		req.onreadystatechange = function(){
 			if (this.readyState == 4 && this.status == 200){
-				var text = req.responseText.replace("[", "").replace("]", "")
-				text = text.replaceAll('null', '"null"')
-				console.log(text)
-				var daqpulse = text.split('","')[0].replace('"', '')
-				var synctime = text.split('","')[1]
-				var daqstate = text.split('","')[2]
-				var physgbps = text.split('","')[3]
-				var antnames = text.split('","')[4]
-				var obsndrop = text.split('","')[5].replace('"', '')
-
-				var text = "<br></br>DAQPULSE " + daqpulse + "<br></br>SYNCTIME " + synctime + "<br></br>DAQSTATE " + daqstate
-				text += "<br></br>PHYSGBPS " + physgbps + "<br></br>ANTNAMES " + antnames + "<br></br>OBSNDROP " + obsndrop
-				document.getElementById(nodenum + "_basics").innerHTML = text
+				callbackFunc(JSON.parse(req.responseText));
 			}
 		}
+		req.open("GET", "/basics?nodenum=" + nodenum + "&instancenum=" + instancenum)
+		req.send()
 	}
 	
 	class Panel extends React.Component {
 		render() {
 			return (
-				<form action="/node">
-				<button className="genericpanel" id={"seti-node" + this.props.nodenum/10 + "/" + this.props.nodenum % 10}  style={{position: this.props.position, top: this.props.top + "%", left: this.props.left + "%", backgroundColor: this.props.color, fontFamily: 'Courier', textAlign: 'left', lineHeight: "7px"}}>
-					<b>seti-node{Math.floor(this.props.nodenum/10)}/{this.props.nodenum%10}</b>
-					<span id={this.props.nodenum + "_basics"}></span>
-				</button>
-				<input type="hidden" name="nodenum" value={this.props.nodenum}></input>
-				</form>
+				<a className="panel" href={"/node?nodenum="+this.props.nodenum+"&instancenum="+this.props.instancenum}>
+					<div 
+						className="genericpanel" 
+						id={"seti-node" + this.props.nodenum + "/" + this.props.instancenum}  
+						style={{
+							backgroundColor: this.props.color,
+							border: "2px solid " + this.props.bordercolor
+						}}
+					>
+						<b>seti-node{Math.floor(this.props.nodenum)}/{this.props.instancenum}</b>
+						<div style={{height: "10px"}}></div>
+						<div className="keyvalues" id={this.props.nodenum + "_" + this.props.instancenum + "_basics"}>
+							<React.Fragment>
+								{
+									this.props.keys.map((key, keyindex)=>{
+										return <div key={this.props.nodenum + "_" + this.props.instancenum + "_" + keyindex} className="keyvalue">
+												<div className="key">{key}</div> <div className="value">{this.props.values[key]}</div>
+											</div>
+									})
+								}
+							</React.Fragment>
+						</div>
+					</div>
+				</a>
+			);
+		}
+	}
+
+	class InstancesPanel extends React.Component {
+		constructor(props) {
+			super(props);
+			let node_keyvalues = {};
+			for (let index = 0; index < this.props.nodenums.length; index++) {
+				const nodenum = this.props.nodenums[index];
+				node_keyvalues[nodenum] = {keys:[], values:{}};
+			}
+			this.state = {
+				instancenum: this.props.instancenum,
+				nodenums: this.props.nodenums,
+				node_keyvalues: node_keyvalues
+			}
+		}
+
+		setKeyValuesForNode(index, keyvalues) {
+			const nodenums = this.state.nodenums;
+			const nodenum = nodenums[index];
+			const instancenum = this.state.instancenum;
+			let node_keyvalues = this.state.node_keyvalues;
+			let node_new_keyvalues = {keys:[], values:keyvalues};
+			for(let key in keyvalues){
+				node_new_keyvalues["keys"] = node_new_keyvalues["keys"].concat([key]);
+			}
+			node_keyvalues[nodenum] = node_new_keyvalues;
+			this.setState({
+				instancenum: instancenum,
+				nodenums: nodenums,
+				node_keyvalues: node_keyvalues
+			})
+		}
+
+		setKeyValuesForNodeThenAgain(index, keyvalues){
+			this.setKeyValuesForNode(index, keyvalues);
+			index = (index + 1) % this.state.nodenums.length;
+			fetchBasicsCallback(
+				this.state.nodenums[index],
+				this.state.instancenum, 
+				(keyvalues) => {this.setKeyValuesForNodeThenAgain(index, keyvalues)}
+			)
+		}
+
+		componentDidMount() {
+			for (let index = 0; index < this.state.nodenums.length; index++) {
+				const element = this.state.nodenums[index];
+				this.setKeyValuesForNodeThenAgain(index, {})
+			}
+		}
+
+		componentWillUnMount() {
+		}
+
+		render(){
+			return (
+				<div className="instancespanel">
+					<React.Fragment>
+						{this.state.nodenums.map(
+							(nodenum, index) => {
+								return <Panel 
+									key={"Panel_" + nodenum + "_" + this.state.instancenum}
+									nodenum={nodenum}
+									instancenum={this.state.instancenum}
+									color={this.props.rowcolors[this.state.instancenum]}
+									bordercolor={this.props.nodecolors[index]}
+									keys={this.state.node_keyvalues[nodenum]["keys"]}
+									values={this.state.node_keyvalues[nodenum]["values"]}
+								/>
+							}
+						)}
+					</React.Fragment>
+				</div>
 			);
 		}
 	}
 
 	class Page extends React.Component {
+		constructor(props) {
+			super(props)
+			this.props.instance_nodenums_dicts.map((instance_nodenums, index) =>{
+				let instancenum = instance_nodenums["instancenum"]
+				let nodenums = instance_nodenums["nodenums"]
+				let nodecolors = []
+				for (let index = 0; index < nodenums.length; index++) {
+					let rgb = this.HSVtoRGB(nodenums[index]/this.props.node_count, 0.6, 0.8)
+					nodecolors = nodecolors.concat(["rgb(" + rgb.r + "," + rgb.g + "," + rgb.b + ")"])
+				}
+				this.props.instance_nodenums_dicts[index]["nodecolors"] = nodecolors
+			})
+			this.state = {
+				instance_nodenums_dicts: this.props.instance_nodenums_dicts,
+				rowcolors: this.props.rowcolors,
+				node_count: this.props.node_count
+			}
+		}
+
+		/* https://stackoverflow.com/a/17243070 
+		* accepts parameters
+		* h  Object = {h:x, s:y, v:z}
+		* OR 
+		* h, s, v
+		*/
+		HSVtoRGB(h, s, v) {
+				var r, g, b, i, f, p, q, t;
+				if (arguments.length === 1) {
+						s = h.s, v = h.v, h = h.h;
+				}
+				i = Math.floor(h * 6);
+				f = h * 6 - i;
+				p = v * (1 - s);
+				q = v * (1 - f * s);
+				t = v * (1 - (1 - f) * s);
+				switch (i % 6) {
+						case 0: r = v, g = t, b = p; break;
+						case 1: r = q, g = v, b = p; break;
+						case 2: r = p, g = v, b = t; break;
+						case 3: r = p, g = q, b = v; break;
+						case 4: r = t, g = p, b = v; break;
+						case 5: r = v, g = p, b = q; break;
+				}
+				return {
+						r: Math.round(r * 255),
+						g: Math.round(g * 255),
+						b: Math.round(b * 255)
+				};
+		}
+
 		render(){
 			return (
-				<React.Fragment>
-					<Panel nodenum={10} top={30} left={15} position={"fixed"} color={"#456789"}/>
-					<Panel nodenum={20} top={30} left={36.66} position={"fixed"} color={"#987654"}/>
-
-					<Panel nodenum={30} top={30} left={63.33} position={"fixed"} color={"#456789"}/>
-					<Panel nodenum={40} top={30} left={85} position={"fixed"} color={"#987654"}/>
-
-					<Panel nodenum={11} top={70} left={15} position={"fixed"} color={"#456789"}/>
-					<Panel nodenum={21} top={70} left={36.66} position={"fixed"} color={"#987654"}/>
-
-					<Panel nodenum={31} top={70} left={63.66} position={"fixed"} color={"#456789"}/>
-					<Panel nodenum={41} top={70} left={85} position={"fixed"} color={"#987654"}/>
-				</React.Fragment>
+				<div className="page">
+					<React.Fragment>{
+						this.state.instance_nodenums_dicts.map((instance_nodenums, index) =>{
+							return <InstancesPanel 
+								key={"InstancesPanel_" + index}
+								instancenum={instance_nodenums["instancenum"]}
+								nodenums={instance_nodenums["nodenums"]}
+								nodecolors={instance_nodenums["nodecolors"]}
+								rowcolors={this.state.rowcolors}
+							/>
+						})
+					}
+					</React.Fragment>
+				</div>
 			);
 		}
 	}
-
-
-	ReactDOM.render(<Page />, document.getElementById('root'))	
-
 	
-	var nodenumlist = [10, 11, 20, 21, 30, 31, 40, 41]
-
-	setInterval(function(){ fetchBasics(10)}, 100)
-	setInterval(function(){ fetchBasics(11)}, 100)
-	setInterval(function(){ fetchBasics(20)}, 100)
-	setInterval(function(){ fetchBasics(21)}, 100)
-	setInterval(function(){ fetchBasics(30)}, 100)
-	setInterval(function(){ fetchBasics(31)}, 100)
-	setInterval(function(){ fetchBasics(40)}, 100)
-	setInterval(function(){ fetchBasics(41)}, 100)
+	ReactDOM.render(<Page 
+			instance_nodenums_dicts={[
+				{"instancenum":0, "nodenums":[1,2,3,4]},
+				{"instancenum":1, "nodenums":[1,2,3,4]},
+				{"instancenum":0, "nodenums":[5,6,7,8]},
+				{"instancenum":1, "nodenums":[5,6,7,8]},
+			]}
+			rowcolors={["#456789", "#987654"]}
+			node_count={8}
+		/>,
+		document.getElementById('root')
+	)
 
 
 	setInterval(function(){

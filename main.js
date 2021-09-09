@@ -6,8 +6,21 @@ const redis = require("redis");
 const client = redis.createClient(6379, 'redishost');
 
 const app = express()
-const port = 81
+const port = 8082
 const host = '0.0.0.0'
+
+let summary_keys = []
+fs.readFile('summary_keys.txt', (err, data) => {
+	if (err) throw err;
+	summary_keys = data.toString().split("\n")
+})
+
+setInterval(function(){
+	fs.readFile('summary_keys.txt', (err, data) => {
+		if (err) throw err;
+		summary_keys = data.toString().split("\n")
+	})
+}, 5000)
 
 app.use(express.static('public'));
 
@@ -29,12 +42,18 @@ app.get("/basics", (req, res) => {
 	var url = req.url.split("?")[1]
 	urlParams = new URLSearchParams(url)
 
-	var nodenum = urlParams.get("nodenum")
-	var nodename = "hashpipe://seti-node" + nodenum[0] + "/" + nodenum[1] + "/status"
-
-	client.hmget(nodename, "DAQPULSE", "SYNCTIME", "DAQSTATE", "PHYSGBPS", "ANTNAMES", "OBSNDROP", function(err, reply){
-		res.send(reply)
-	});
+	let nodenum = urlParams.get("nodenum")
+	let instancenum = urlParams.get("instancenum")
+	let nodename = "hashpipe://seti-node" + nodenum + "/" + instancenum + "/status"
+	client.hmget(nodename, summary_keys,
+		function(err, reply){
+			let keyvalues = {};
+			for (let index = 0; index < summary_keys.length; index++) {
+				keyvalues[summary_keys[index]] = reply[index] === null ? "null" : reply[index];
+			}
+			res.send(keyvalues)
+		}
+	);
 })
 
 app.get("/getall", (req, res) => {
@@ -42,7 +61,8 @@ app.get("/getall", (req, res) => {
 	urlParams = new URLSearchParams(url)
 
 	var nodenum = urlParams.get("nodenum")
-	var nodename = "hashpipe://seti-node" + nodenum[0] + "/" + nodenum[1] + "/status"
+	var instancenum = urlParams.get("instancenum")
+	var nodename = "hashpipe://seti-node" + nodenum + "/" + instancenum + "/status"
 
 	client.hgetall(nodename, function(err, reply){
 		res.send(reply)
