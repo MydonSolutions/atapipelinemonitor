@@ -15,21 +15,27 @@
 			flex-wrap: wrap;
 			padding: 0px 2px 4px;
 			font-size: 18px;
-			color: #FFF;
 		}
-		.keyvalues:nth-child(odd) {
-			color: #999;
+		.keyvalue:nth-child(odd) {
+			color: #888;
+		}
+		.keyvalue:nth-child(even){
+			color: #bbb;
 		}
 
 		.keyvalue {
+			font-family: Courier;
 			display: flex;
+			margin: 1px 5px
+			
 		}
 		.key {
 			width: 14ch;
 		}
 		.value {
 			text-align: 'left';
-			width: 45ch;
+			width: 30ch;
+			word-wrap: break-word;
 		}
 
 		input[type=Submit]:hover{
@@ -91,7 +97,7 @@
 		var instancenum = params.get("instancenum")
 		console.log(nodenum, instancenum)
 		fetchAll(nodenum, instancenum)
-		setInterval(function(){fetchAll(nodenum, instancenum)}, 500 )
+		var fetchInterval = setInterval(function(){fetchAll(nodenum, instancenum)}, 500 )
 
 
         	setInterval(function(){
