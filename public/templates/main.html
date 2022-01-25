@@ -26,6 +26,7 @@
 		req.send()
 	}
 	
+	// Each node instance is contained within a single Panel
 	class Panel extends React.Component {
 		render() {
 			return (
@@ -35,7 +36,7 @@
 						id={"seti-node" + this.props.nodenum + "/" + this.props.instancenum}  
 						style={{
 							backgroundColor: this.props.color,
-							border: "2px solid " + this.props.bordercolor
+							border : this.determineBorder(0.8)
 						}}
 					>
 						<b>seti-node{Math.floor(this.props.nodenum)}/{this.props.instancenum}</b>
@@ -55,8 +56,29 @@
 				</a>
 			);
 		}
+		//Determine the border colour based on a value[0,1] and a threshold[0,1] 
+		determineBorder(threshold){
+		let r = "4px solid rgb(" + 255 + "," + 0 + "," + 0 + ")"
+		let value = this.determineIBVBUFSTRatio()
+		return value >= threshold ? r : ("2px solid " + this.props.bordercolor)
+		}
+
+		determineIBVBUFSTRatio()
+		{
+			console.log(this.props.values)
+			let ibvbufst_str = this.props.values["IBVBUFST"]
+			if(ibvbufst_str)
+			{
+				let ibvbufst_parts = ibvbufst_str.split("/")
+				let ibvnumerator = ibvbufst_parts[0]
+				let ibvdenomenator = ibvbufst_parts[1]
+				return parseFloat(ibvnumerator)/parseFloat(ibvdenomenator)
+			}
+			return 0
+		}
 	}
 
+	// Each row-set of nodes is contained within an instance Panel
 	class InstancesPanel extends React.Component {
 		constructor(props) {
 			super(props);
