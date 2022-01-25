@@ -1,0 +1,35 @@
+body {
+    background-color: #222;
+}
+
+.keyvalues {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0px 2px 4px;
+    font-size: 18px;
+}
+.keyvalue:nth-child(odd) {
+    color: #888;
+}
+.keyvalue:nth-child(even){
+    color: #bbb;
+}
+
+.keyvalue {
+    font-family: Courier;
+    display: flex;
+    margin: 1px 5px
+    
+}
+.key {
+    width: 14ch;
+}
+.value {
+    text-align: 'left';
+    width: 30ch;
+    word-wrap: break-word;
+}
+
+input[type=Submit]:hover{
+    filter: brightness(150%);
+}

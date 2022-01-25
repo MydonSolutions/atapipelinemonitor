@@ -1,0 +1,50 @@
+.page {
+    background-color: #123456;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    position: absolute;
+    min-width: 100%;
+    min-height: 100%;
+    top: 0;
+    left: 0;
+}
+.instancespanel{
+    display: flex;
+    /* flex-direction: column; */
+    justify-content: space-evenly;
+}
+
+.genericpanel {
+    color: #FFFFFF;
+    width: 300px;
+    min-height: 112px;
+    border-radius: 5px;
+    margin: 5px;
+    padding: 5px;
+    font-family: 'Courier';
+    font-size: 14px;
+    text-align: 'left';
+}
+.genericpanel:hover{
+    filter: brightness(115%);
+}
+
+a.panel {
+    text-decoration: none;
+}
+
+.keyvalues {
+    padding: 0px 2px 4px;
+}
+.keyvalue {
+    display: flex;
+}
+.key {
+    min-width: 9ch;
+}
+.value {
+    width: 26ch;
+    text-align: 'left';
+    word-wrap: break-word;
+}
