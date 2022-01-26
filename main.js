@@ -10,6 +10,8 @@ const port = 8081
 const host = '0.0.0.0'
 
 let summary_keys = []
+let functional_keys = ["PKTIDX","PKTSTART","PKTSTOP"]
+
 fs.readFile('summary_keys.txt', (err, data) => {
 	if (err) throw err;
 	summary_keys = data.toString().split("\n")
@@ -45,11 +47,15 @@ app.get("/basics", (req, res) => {
 	let nodenum = urlParams.get("nodenum")
 	let instancenum = urlParams.get("instancenum")
 	let nodename = "hashpipe://seti-node" + nodenum + "/" + instancenum + "/status"
-	client.hmget(nodename, summary_keys,
+
+	client.hmget(nodename, summary_keys.concat(functional_keys),
 		function(err, reply){
 			let keyvalues = {};
 			for (let index = 0; index < summary_keys.length; index++) {
 				keyvalues[summary_keys[index]] = reply[index] === null ? "null" : reply[index];
+			}
+			for (let index = 0; index < functional_keys.length; index++) {
+				keyvalues["_"+functional_keys[index]] = reply[summary_keys.length + index] === null ? "null" : reply[summary_keys.length + index];
 			}
 			res.send(keyvalues)
 		}
