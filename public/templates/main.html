@@ -29,6 +29,7 @@
 	// Each node instance is contained within a single Panel
 	class Panel extends React.Component {
 		render() {
+			let progressvals = this.getValsforProgress()
 			return (
 				<a className="panel" href={"/node?nodenum="+this.props.nodenum+"&instancenum="+this.props.instancenum}>
 					<div 
@@ -38,16 +39,22 @@
 							backgroundColor: this.props.color,
 							border : this.determineBorder(0.8)
 						}}
-					>
+					>	
+						<div className = "genericpanelheading"> 
 						<b>seti-node{Math.floor(this.props.nodenum)}/{this.props.instancenum}</b>
+						<progress value = {progressvals[0]} max = {progressvals[1]}></progress>
+						</div>
 						<div style={{height: "10px"}}></div>
 						<div className="keyvalues" id={this.props.nodenum + "_" + this.props.instancenum + "_basics"}>
 							<React.Fragment>
 								{
 									this.props.keys.map((key, keyindex)=>{
-										return <div key={this.props.nodenum + "_" + this.props.instancenum + "_" + keyindex} className="keyvalue">
+										if(key[0] != "_")
+										{
+											return <div key={this.props.nodenum + "_" + this.props.instancenum + "_" + keyindex} className="keyvalue">
 												<div className="key">{key}</div> <div className="value">{this.props.values[key]}</div>
 											</div>
+										}
 									})
 								}
 							</React.Fragment>
@@ -65,7 +72,6 @@
 
 		determineIBVBUFSTRatio()
 		{
-			console.log(this.props.values)
 			let ibvbufst_str = this.props.values["IBVBUFST"]
 			if(ibvbufst_str)
 			{
@@ -75,6 +81,22 @@
 				return parseFloat(ibvnumerator)/parseFloat(ibvdenomenator)
 			}
 			return 0
+		}
+
+		//Determine observation progress for display in a progress bar
+		getValsforProgress()
+		{
+			let pktindex = parseInt(this.props.values["_PKTIDX"])
+			let pktstop = parseInt(this.props.values["_PKTSTOP"])
+			let pktstart = parseInt(this.props.values["_PKTSTART"])
+			if(pktindex && pktstop && pktstart)
+			{
+				return [pktindex - pktstart, pktstop - pktstart]
+			}
+			else
+			{
+				return [0,10] //empty bar if null values
+			}	
 		}
 	}
 

@@ -29,6 +29,10 @@
 .genericpanel:hover{
     filter: brightness(115%);
 }
+.genericpanelheading{
+    display : flex;
+    justify-content: space-between;
+}
 
 a.panel {
     text-decoration: none;
