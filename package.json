@@ -1,0 +1,26 @@
+{
+  "name": "atapipelinemonitor",
+  "version": "1.0.0",
+  "description": "Monitor Hpguppi Status Buffers reflected on REDIS by hashpipe_redis_gateways.",
+  "main": "main.js",
+  "dependencies": {
+    "express": "^4.17.2",
+    "redis": "^3.0.2",
+    "rs": "0.0.1",
+    "url": "^0.11.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "serve": "node main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MydonSolutions/atapipelinemonitor.git"
+  },
+  "author": "Gurmehar Singh, Ross Donnachie",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MydonSolutions/atapipelinemonitor/issues"
+  },
+  "homepage": "https://github.com/gsingh-0-0-1/atapipelinemonitor#readme"
+}
