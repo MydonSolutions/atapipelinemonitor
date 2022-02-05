@@ -19,9 +19,9 @@
 	</body>
 
 	<script>
-		function fetchAll(nodenum, instancenum){
+		function fetchAll(nodehostname, instancenum){
 			var req = new XMLHttpRequest
-			req.open("GET", "/getall?nodenum=" + nodenum + "&instancenum=" + instancenum)
+			req.open("GET", "/hashpipestatus?nodehostname=" + nodehostname + "&instancenum=" + instancenum)
 			req.send()
 
 			req.onreadystatechange = function(){
@@ -56,11 +56,11 @@
 		}
 
 		params = new URLSearchParams(document.location.search)
-		var nodenum = params.get("nodenum")
+		var nodehostname = params.get("nodehostname")
 		var instancenum = params.get("instancenum")
-		console.log(nodenum, instancenum)
-		fetchAll(nodenum, instancenum)
-		var fetchInterval = setInterval(function(){fetchAll(nodenum, instancenum)}, 500 )
+		console.log(nodehostname, instancenum)
+		fetchAll(nodehostname, instancenum)
+		var fetchInterval = setInterval(function(){fetchAll(nodehostname, instancenum)}, 500 )
 
 
         	setInterval(function(){

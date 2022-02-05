@@ -15,44 +15,96 @@
 <script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
 <script type="text/babel">
 	
-	function fetchBasicsCallback(nodenum, instancenum, callbackFunc){
+	function fetchHashpipeSummaryCallback(nodehostname, instancenum, callbackFunc){
 		let req = new XMLHttpRequest;
 		req.onreadystatechange = function(){
 			if (this.readyState == 4 && this.status == 200){
 				callbackFunc(JSON.parse(req.responseText));
 			}
 		}
-		req.open("GET", "/basics?nodenum=" + nodenum + "&instancenum=" + instancenum)
+		req.open("GET", "/hashpipesummary?nodehostname=" + nodehostname + "&instancenum=" + instancenum)
+		req.send()
+	}
+	
+	function fetchPostProcStatusCallback(nodehostname, instancenum, callbackFunc){
+		let req = new XMLHttpRequest;
+		req.onreadystatechange = function(){
+			if (this.readyState == 4 && this.status == 200){
+				callbackFunc(JSON.parse(req.responseText));
+			}
+		}
+		req.open("GET", "/postprocstatus?nodehostname=" + nodehostname + "&instancenum=" + instancenum)
 		req.send()
 	}
 	
 	// Each node instance is contained within a single Panel
 	class Panel extends React.Component {
+		constructor(props) {
+			super(props);
+			this.state = {
+				keys: [],
+				values: {}
+			}
+		}
+
+		setKeyValuesForNode(index, keyvalues) {
+			// use index to switch between hashpipe-summary and post-proc
+			let new_keys = [];
+			for(let key in keyvalues){
+				new_keys = new_keys.concat([key]);
+			}
+			this.setState({
+				keys: new_keys,
+				values: keyvalues,
+			})
+		}
+
+		setKeyValuesForNodeThenAgain(index, keyvalues){
+			this.setKeyValuesForNode(index, keyvalues);
+			index = (index + 1) % 2;
+			fetchHashpipeSummaryCallback(
+				this.props.nodehostname,
+				this.props.instancenum,
+				(keyvalues) => {this.setKeyValuesForNodeThenAgain(index, keyvalues)}
+			)
+		}
+
+		componentDidMount() {
+			fetchHashpipeSummaryCallback(
+				this.props.nodehostname,
+				this.props.instancenum,
+				(keyvalues) => {this.setKeyValuesForNodeThenAgain(0, keyvalues)}
+			)
+		}
+
+		componentWillUnMount() {
+		}
+
 		render() {
 			let progressvals = this.getValsforProgress()
 			return (
-				<a className="panel" href={"/node?nodenum="+this.props.nodenum+"&instancenum="+this.props.instancenum}>
+				<a className="panel" href={"/node?nodehostname="+this.props.nodehostname+"&instancenum="+this.props.instancenum}>
 					<div 
 						className="genericpanel" 
-						id={"seti-node" + this.props.nodenum + "/" + this.props.instancenum}  
+						id={this.props.nodehostname + "/" + this.props.instancenum}  
 						style={{
 							backgroundColor: this.props.color,
 							border : this.determineBorder(0.8)
 						}}
 					>	
 						<div className = "genericpanelheading"> 
-						<b>seti-node{Math.floor(this.props.nodenum)}/{this.props.instancenum}</b>
+						<b>{this.props.nodehostname}/{this.props.instancenum}</b>
 						<progress value = {progressvals[0]} max = {progressvals[1]}></progress>
 						</div>
 						<div style={{height: "10px"}}></div>
-						<div className="keyvalues" id={this.props.nodenum + "_" + this.props.instancenum + "_basics"}>
+						<div className="keyvalues" id={this.props.nodehostname + "_" + this.props.instancenum + "_basics"}>
 							<React.Fragment>
 								{
-									this.props.keys.map((key, keyindex)=>{
+									this.state.keys.map((key, keyindex)=>{
 										if(key[0] != "_")
 										{
-											return <div key={this.props.nodenum + "_" + this.props.instancenum + "_" + keyindex} className="keyvalue">
-												<div className="key">{key}</div> <div className="value">{this.props.values[key]}</div>
+											return <div key={this.props.nodehostname + "_" + this.props.instancenum + "_" + keyindex} className="keyvalue">
+												<div className="key">{key}</div> <div className="value">{this.state.values[key]}</div>
 											</div>
 										}
 									})
@@ -63,110 +115,60 @@
 				</a>
 			);
 		}
+
 		//Determine the border colour based on a value[0,1] and a threshold[0,1] 
-		determineBorder(threshold){
-		let r = "4px solid rgb(" + 255 + "," + 0 + "," + 0 + ")"
-		let value = this.determineIBVBUFSTRatio()
-		return value >= threshold ? r : ("2px solid " + this.props.bordercolor)
+		determineBorder(threshold)
+		{
+			let r = "4px solid rgb(" + 255 + "," + 0 + "," + 0 + ")"
+			let value = this.determineIBVBUFSTRatio()
+			return value >= threshold ? r : ("2px solid " + this.props.bordercolor)
 		}
 
 		determineIBVBUFSTRatio()
 		{
-			let ibvbufst_str = this.props.values["IBVBUFST"]
-			if(ibvbufst_str)
-			{
-				let ibvbufst_parts = ibvbufst_str.split("/")
-				let ibvnumerator = ibvbufst_parts[0]
-				let ibvdenomenator = ibvbufst_parts[1]
-				return parseFloat(ibvnumerator)/parseFloat(ibvdenomenator)
-			}
+			try {
+				let ibvbufst_str = this.state.values["IBVBUFST"]
+				if(ibvbufst_str)
+				{
+					let ibvbufst_parts = ibvbufst_str.split("/")
+					let ibvnumerator = ibvbufst_parts[0]
+					let ibvdenomenator = ibvbufst_parts[1]
+					return parseFloat(ibvnumerator)/parseFloat(ibvdenomenator)
+				}	
+			} catch (error) {}
 			return 0
 		}
 
 		//Determine observation progress for display in a progress bar
 		getValsforProgress()
 		{
-			let pktindex = parseInt(this.props.values["_PKTIDX"])
-			let pktstop = parseInt(this.props.values["_PKTSTOP"])
-			let pktstart = parseInt(this.props.values["_PKTSTART"])
-			if(pktindex && pktstop && pktstart)
-			{
-				return [pktindex - pktstart, pktstop - pktstart]
-			}
-			else
-			{
-				return [0,10] //empty bar if null values
-			}	
+			try {
+				let pktindex = parseInt(this.state.values["_PKTIDX"])
+				let pktstop = parseInt(this.state.values["_PKTSTOP"])
+				let pktstart = parseInt(this.state.values["_PKTSTART"])
+				if(pktindex && pktstop && pktstart)
+				{
+					return [pktindex - pktstart, pktstop - pktstart]
+				}
+			} catch (error) {}
+			return [0,10] //empty bar if null values
 		}
 	}
 
 	// Each row-set of nodes is contained within an instance Panel
 	class InstancesPanel extends React.Component {
-		constructor(props) {
-			super(props);
-			let node_keyvalues = {};
-			for (let index = 0; index < this.props.nodenums.length; index++) {
-				const nodenum = this.props.nodenums[index];
-				node_keyvalues[nodenum] = {keys:[], values:{}};
-			}
-			this.state = {
-				instancenum: this.props.instancenum,
-				nodenums: this.props.nodenums,
-				node_keyvalues: node_keyvalues
-			}
-		}
-
-		setKeyValuesForNode(index, keyvalues) {
-			const nodenums = this.state.nodenums;
-			const nodenum = nodenums[index];
-			const instancenum = this.state.instancenum;
-			let node_keyvalues = this.state.node_keyvalues;
-			let node_new_keyvalues = {keys:[], values:keyvalues};
-			for(let key in keyvalues){
-				node_new_keyvalues["keys"] = node_new_keyvalues["keys"].concat([key]);
-			}
-			node_keyvalues[nodenum] = node_new_keyvalues;
-			this.setState({
-				instancenum: instancenum,
-				nodenums: nodenums,
-				node_keyvalues: node_keyvalues
-			})
-		}
-
-		setKeyValuesForNodeThenAgain(index, keyvalues){
-			this.setKeyValuesForNode(index, keyvalues);
-			index = (index + 1) % this.state.nodenums.length;
-			fetchBasicsCallback(
-				this.state.nodenums[index],
-				this.state.instancenum, 
-				(keyvalues) => {this.setKeyValuesForNodeThenAgain(index, keyvalues)}
-			)
-		}
-
-		componentDidMount() {
-			for (let index = 0; index < this.state.nodenums.length; index++) {
-				const element = this.state.nodenums[index];
-				this.setKeyValuesForNodeThenAgain(index, {})
-			}
-		}
-
-		componentWillUnMount() {
-		}
-
 		render(){
 			return (
 				<div className="instancespanel">
 					<React.Fragment>
-						{this.state.nodenums.map(
-							(nodenum, index) => {
+						{this.props.nodehostnames.map(
+							(nodehostname, index) => {
 								return <Panel 
-									key={"Panel_" + nodenum + "_" + this.state.instancenum}
-									nodenum={nodenum}
-									instancenum={this.state.instancenum}
-									color={this.props.rowcolors[this.state.instancenum]}
+									key={"Panel_" + nodehostname + "_" + this.props.instancenum}
+									nodehostname={nodehostname}
+									instancenum={this.props.instancenum}
+									color={this.props.rowcolors[this.props.instancenum]}
 									bordercolor={this.props.nodecolors[index]}
-									keys={this.state.node_keyvalues[nodenum]["keys"]}
-									values={this.state.node_keyvalues[nodenum]["values"]}
 								/>
 							}
 						)}
@@ -179,18 +181,23 @@
 	class Page extends React.Component {
 		constructor(props) {
 			super(props)
-			this.props.instance_nodenums_dicts.map((instance_nodenums, index) =>{
-				let instancenum = instance_nodenums["instancenum"]
-				let nodenums = instance_nodenums["nodenums"]
+			this.props.instance_nodehostnames_dicts.map((instance_nodehostnames, index) =>{
+				let instancenum = instance_nodehostnames["instancenum"]
+				let nodehostnames = instance_nodehostnames["nodehostnames"]
 				let nodecolors = []
-				for (let index = 0; index < nodenums.length; index++) {
-					let rgb = this.HSVtoRGB(nodenums[index]/this.props.node_count, 0.6, 0.8)
+				for (let index = 0; index < nodehostnames.length; index++) {
+					let rgb = this.HSVtoRGB(
+						this.props.nodehostname_ids[nodehostnames[index]]/
+							this.props.node_count,
+						0.7,
+						0.9
+					)
 					nodecolors = nodecolors.concat(["rgb(" + rgb.r + "," + rgb.g + "," + rgb.b + ")"])
 				}
-				this.props.instance_nodenums_dicts[index]["nodecolors"] = nodecolors
+				this.props.instance_nodehostnames_dicts[index]["nodecolors"] = nodecolors
 			})
 			this.state = {
-				instance_nodenums_dicts: this.props.instance_nodenums_dicts,
+				instance_nodehostnames_dicts: this.props.instance_nodehostnames_dicts,
 				rowcolors: this.props.rowcolors,
 				node_count: this.props.node_count
 			}
@@ -231,12 +238,12 @@
 			return (
 				<div className="page">
 					<React.Fragment>{
-						this.state.instance_nodenums_dicts.map((instance_nodenums, index) =>{
+						this.state.instance_nodehostnames_dicts.map((instance_nodehostnames, index) =>{
 							return <InstancesPanel 
 								key={"InstancesPanel_" + index}
-								instancenum={instance_nodenums["instancenum"]}
-								nodenums={instance_nodenums["nodenums"]}
-								nodecolors={instance_nodenums["nodecolors"]}
+								instancenum={instance_nodehostnames["instancenum"]}
+								nodehostnames={instance_nodehostnames["nodehostnames"]}
+								nodecolors={instance_nodehostnames["nodecolors"]}
 								rowcolors={this.state.rowcolors}
 							/>
 						})
@@ -248,24 +255,33 @@
 	}
 	
 	ReactDOM.render(<Page 
-			instance_nodenums_dicts={[
-				{"instancenum":0, "nodenums":[1,2,3,4]},
-				{"instancenum":1, "nodenums":[1,2,3,4]},
-				{"instancenum":0, "nodenums":[5,6,7,8]},
-				{"instancenum":1, "nodenums":[5,6,7,8]},
+			instance_nodehostnames_dicts={[
+				{"instancenum":0, "nodehostnames":["seti-node1","seti-node2","seti-node3","seti-node4"]},
+				{"instancenum":1, "nodehostnames":["seti-node1","seti-node2","seti-node3","seti-node4"]},
+				{"instancenum":0, "nodehostnames":["seti-node5","seti-node6","seti-node7","seti-node8"]},
+				{"instancenum":1, "nodehostnames":["seti-node5","seti-node6","seti-node7","seti-node8"]},
 			]}
-			rowcolors={["#456789", "#987654"]}
+			rowcolors={["#456789", "#ABCDEF"]}
 			node_count={8}
+			nodehostname_ids={{
+				"seti-node1": 0,
+				"seti-node2": 1,
+				"seti-node3": 2,
+				"seti-node4": 3,
+				"seti-node5": 4,
+				"seti-node6": 5,
+				"seti-node7": 6,
+				"seti-node8": 7
+			}}
 		/>,
 		document.getElementById('root')
 	)
 
-
-	setInterval(function(){
-		var ping = new XMLHttpRequest;
-		ping.open("GET", "/ping")
-		ping.send()
-	}, 10000)
+	// setInterval(function(){
+	// 	var ping = new XMLHttpRequest;
+	// 	ping.open("GET", "/ping")
+	// 	ping.send()
+	// }, 10000)
 
 </script>
 </html>

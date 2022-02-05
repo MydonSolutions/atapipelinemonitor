@@ -34,21 +34,15 @@ app.get("/node", (req, res) => {
 	res.sendFile("public/templates/node.html", {root: __dirname})
 })
 
-app.get("/allkeys", (req, res) => {
-	client.keys("*", function(err, reply) {
-		res.send(reply)
-	});
-})
-
-app.get("/basics", (req, res) => {
+app.get("/hashpipesummary", (req, res) => {
 	var url = req.url.split("?")[1]
 	urlParams = new URLSearchParams(url)
 
-	let nodenum = urlParams.get("nodenum")
+	let nodehostname = urlParams.get("nodehostname")
 	let instancenum = urlParams.get("instancenum")
-	let nodename = "hashpipe://seti-node" + nodenum + "/" + instancenum + "/status"
+	let redishashname = "hashpipe://" + nodehostname + "/" + instancenum + "/status"
 
-	client.hmget(nodename, summary_keys.concat(functional_keys),
+	client.hmget(redishashname, summary_keys.concat(functional_keys),
 		function(err, reply){
 			let keyvalues = {};
 			for (let index = 0; index < summary_keys.length; index++) {
@@ -62,15 +56,32 @@ app.get("/basics", (req, res) => {
 	);
 })
 
-app.get("/getall", (req, res) => {
+app.get("/hashpipestatus", (req, res) => {
 	var url = req.url.split("?")[1]
 	urlParams = new URLSearchParams(url)
 
-	var nodenum = urlParams.get("nodenum")
+	var nodehostname = urlParams.get("nodehostname")
 	var instancenum = urlParams.get("instancenum")
-	var nodename = "hashpipe://seti-node" + nodenum + "/" + instancenum + "/status"
+	var redishashname = "hashpipe://" + nodehostname + "/" + instancenum + "/status"
 
-	client.hgetall(nodename, function(err, reply){
+	client.hgetall(redishashname, function(err, reply){
+		res.send(reply)
+	})
+})
+
+app.get("/postprocstatus", (req, res) => {
+	var url = req.url.split("?")[1]
+	urlParams = new URLSearchParams(url)
+
+	var nodehostname = urlParams.get("nodehostname")
+	var instancenum = urlParams.get("instancenum")
+	var redishashname = "postprocpype://" + nodehostname + "/" + instancenum + "/status"
+
+	client.hgetall(redishashname, function(err, reply){
+		reply = Object.keys(reply).sort().reduce(function (result, key) {
+			result[key] = reply[key];
+			return result;
+		}, {});
 		res.send(reply)
 	})
 })
