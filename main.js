@@ -78,6 +78,9 @@ app.get("/postprocstatus", (req, res) => {
 	var redishashname = "postprocpype://" + nodehostname + "/" + instancenum + "/status"
 
 	client.hgetall(redishashname, function(err, reply){
+		if (reply == null) {
+			reply = {POSTPROC: null}
+		}
 		reply = Object.keys(reply).sort().reduce(function (result, key) {
 			result[key] = reply[key];
 			return result;

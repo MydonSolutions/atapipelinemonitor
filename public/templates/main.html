@@ -43,8 +43,21 @@
 			super(props);
 			this.state = {
 				keys: [],
-				values: {}
+				values: {},
+				postproc_expanded: false,
+				postproc_keys: [],
+				postproc_values: {},
 			}
+		}
+
+		togglePostProcExpanded() {
+			this.setState({
+				keys: this.state.keys,
+				values: this.state.values,
+				postproc_expanded: !this.state.postproc_expanded,
+				postproc_keys: this.state.postproc_keys,
+				postproc_values: this.state.postproc_values,
+			})
 		}
 
 		setKeyValuesForNode(index, keyvalues) {
@@ -53,20 +66,43 @@
 			for(let key in keyvalues){
 				new_keys = new_keys.concat([key]);
 			}
-			this.setState({
-				keys: new_keys,
-				values: keyvalues,
-			})
+			if(index == 0) {
+				this.setState({
+					keys: new_keys,
+					values: keyvalues,
+					postproc_expanded: this.state.postproc_expanded,
+					postproc_keys: this.state.postproc_keys,
+					postproc_values: this.state.postproc_values,
+				})
+			}
+			else if(index == 1) {
+				this.setState({
+					keys: this.state.keys,
+					values: this.state.values,
+					postproc_expanded: this.state.postproc_expanded,
+					postproc_keys: new_keys,
+					postproc_values: keyvalues,
+				})
+			}
 		}
 
 		setKeyValuesForNodeThenAgain(index, keyvalues){
 			this.setKeyValuesForNode(index, keyvalues);
-			index = (index + 1) % 2;
-			fetchHashpipeSummaryCallback(
-				this.props.nodehostname,
-				this.props.instancenum,
-				(keyvalues) => {this.setKeyValuesForNodeThenAgain(index, keyvalues)}
-			)
+			index = (index + 1) % (this.state.postproc_expanded ? 2 : 1);
+			if(index == 0) {
+				fetchHashpipeSummaryCallback(
+					this.props.nodehostname,
+					this.props.instancenum,
+					(keyvalues) => {this.setKeyValuesForNodeThenAgain(index, keyvalues)}
+				)
+			}
+			else if(index == 1) {
+				fetchPostProcStatusCallback(
+					this.props.nodehostname,
+					this.props.instancenum,
+					(keyvalues) => {this.setKeyValuesForNodeThenAgain(index, keyvalues)}
+				)
+			}
 		}
 
 		componentDidMount() {
@@ -83,36 +119,58 @@
 		render() {
 			let progressvals = this.getValsforProgress()
 			return (
-				<a className="panel" href={"/node?nodehostname="+this.props.nodehostname+"&instancenum="+this.props.instancenum}>
-					<div 
-						className="genericpanel" 
-						id={this.props.nodehostname + "/" + this.props.instancenum}  
-						style={{
-							backgroundColor: this.props.color,
-							border : this.determineBorder(0.8)
-						}}
-					>	
+				<div 
+					className="genericpanel" 
+					id={this.props.nodehostname + "/" + this.props.instancenum}  
+					style={{
+						backgroundColor: this.props.color,
+						border : this.determineBorder(0.8)
+					}}
+				>	
+					<a className="panel" href={"/node?nodehostname="+this.props.nodehostname+"&instancenum="+this.props.instancenum}>
 						<div className = "genericpanelheading"> 
-						<b>{this.props.nodehostname}/{this.props.instancenum}</b>
-						<progress value = {progressvals[0]} max = {progressvals[1]}></progress>
+							<b>{this.props.nodehostname}/{this.props.instancenum}</b>
+							<progress value = {progressvals[0]} max = {progressvals[1]}></progress>
 						</div>
-						<div style={{height: "10px"}}></div>
-						<div className="keyvalues" id={this.props.nodehostname + "_" + this.props.instancenum + "_basics"}>
-							<React.Fragment>
-								{
-									this.state.keys.map((key, keyindex)=>{
-										if(key[0] != "_")
-										{
-											return <div key={this.props.nodehostname + "_" + this.props.instancenum + "_" + keyindex} className="keyvalue">
-												<div className="key">{key}</div> <div className="value">{this.state.values[key]}</div>
-											</div>
-										}
-									})
-								}
-							</React.Fragment>
+					</a>
+					<div style={{height: "10px"}}></div>
+					<div className="keyvalues" id={this.props.nodehostname + "_" + this.props.instancenum + "_basics"}>
+						<React.Fragment>
+							{
+								this.state.keys.map((key, keyindex)=>{
+									if(key[0] != "_")
+									{
+										return <div key={this.props.nodehostname + "_" + this.props.instancenum + "_" + keyindex} className="keyvalue">
+											<div className="key">{key}</div> <div className="value">{this.state.values[key]}</div>
+										</div>
+									}
+								})
+							}
+						</React.Fragment>
+					</div>
+					<div style={{height: "10px"}}></div>
+					<div>
+						<div onClick={this.togglePostProcExpanded.bind(this)}>
+							{this.state.postproc_expanded ? 'Collapse' : 'Expand'} Post Processing Keys
+						</div>
+						<div style={{display: this.state.postproc_expanded ? 'block' : 'none'}}>
+							<div className="postproc_keyvalues" id={"postproc_" + this.props.nodehostname + "_" + this.props.instancenum + "_basics"}>
+								<React.Fragment>
+									{
+										this.state.postproc_keys.map((key, keyindex)=>{
+											if(key[0] != "_")
+											{
+												return <div key={"postproc_" + this.props.nodehostname + "_" + this.props.instancenum + "_" + keyindex} className="keyvalue">
+													<div className="key">{key}</div> <div className="value">{this.state.postproc_values[key]}</div>
+												</div>
+											}
+										})
+									}
+								</React.Fragment>
+							</div>
 						</div>
 					</div>
-				</a>
+				</div>
 			);
 		}
 
@@ -261,7 +319,7 @@
 				{"instancenum":0, "nodehostnames":["seti-node5","seti-node6","seti-node7","seti-node8"]},
 				{"instancenum":1, "nodehostnames":["seti-node5","seti-node6","seti-node7","seti-node8"]},
 			]}
-			rowcolors={["#456789", "#ABCDEF"]}
+			rowcolors={["#456789", "#896745"]}
 			node_count={8}
 			nodehostname_ids={{
 				"seti-node1": 0,
