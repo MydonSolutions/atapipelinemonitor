@@ -6,7 +6,6 @@
 	<link href = "./templates/main.css" rel = "stylesheet" type="text/css">
 </head>
 <body>
-
 	<div id="root"></div> 
 	
 </body>
@@ -14,7 +13,7 @@
 <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
 <script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
 <script type="text/babel">
-	
+	let expandedKeyNodes = false
 	function fetchHashpipeSummaryCallback(nodehostname, instancenum, callbackFunc){
 		let req = new XMLHttpRequest;
 		req.onreadystatechange = function(){
@@ -88,7 +87,7 @@
 
 		setKeyValuesForNodeThenAgain(index, keyvalues){
 			this.setKeyValuesForNode(index, keyvalues);
-			index = (index + 1) % (this.state.postproc_expanded ? 2 : 1);
+			index = (index + 1) % (this.state.postproc_expanded | expandedKeyNodes ? 2 : 1);
 			if(index == 0) {
 				fetchHashpipeSummaryCallback(
 					this.props.nodehostname,
@@ -128,7 +127,7 @@
 					}}
 				>	
 					<a className="panel" href={"/node?nodehostname="+this.props.nodehostname+"&instancenum="+this.props.instancenum}>
-						<div className = "genericpanelheading"> 
+						<div className = "genericpanelheading" style = {{color:this.determineHeadingColor(0.8)}}> 
 							<b>{this.props.nodehostname}/{this.props.instancenum}</b>
 							<progress value = {progressvals[0]} max = {progressvals[1]}></progress>
 						</div>
@@ -150,10 +149,10 @@
 					</div>
 					<div style={{height: "10px"}}></div>
 					<div>
-						<div onClick={this.togglePostProcExpanded.bind(this)}>
-							{this.state.postproc_expanded ? 'Collapse' : 'Expand'} Post Processing Keys
+						<div className = "expand_collapse_link" onClick={this.togglePostProcExpanded.bind(this)}>
+							{this.state.postproc_expanded | expandedKeyNodes ? 'Collapse' : 'Expand'} Post Processing Keys
 						</div>
-						<div style={{display: this.state.postproc_expanded ? 'block' : 'none'}}>
+						<div style={{display: this.state.postproc_expanded | expandedKeyNodes ? 'block' : 'none'}}>
 							<div className="postproc_keyvalues" id={"postproc_" + this.props.nodehostname + "_" + this.props.instancenum + "_basics"}>
 								<React.Fragment>
 									{
@@ -180,6 +179,14 @@
 			let r = "4px solid rgb(" + 255 + "," + 0 + "," + 0 + ")"
 			let value = this.determineIBVBUFSTRatio()
 			return value >= threshold ? r : ("2px solid " + this.props.bordercolor)
+		}
+
+		//Determine the heading colour based on a value[0,1] and a threshold[0,1] 
+		determineHeadingColor(threshold)
+		{
+			let r = "rgb(" + 255 + "," + 0 + "," + 0 + ")"
+			let value = this.determineIBVBUFSTRatio()
+			return value >= threshold ? r : "rgb(22, 228, 22)"
 		}
 
 		determineIBVBUFSTRatio()
@@ -213,7 +220,6 @@
 		}
 	}
 
-	// Each row-set of nodes is contained within an instance Panel
 	class InstancesPanel extends React.Component {
 		render(){
 			return (
@@ -295,6 +301,11 @@
 		render(){
 			return (
 				<div className="page">
+					<nav className = "side-navigation-bar">
+						<h2>ATA Pipeline Monitor</h2>
+						<input className="nav-item" id="expand_ppkeys_checkbox" type="checkbox" onChange={() => {expandedKeyNodes = document.getElementById('expand_ppkeys_checkbox').checked}}/>
+						<label htmlFor="postprockeys"> Expand all postprocessing keys </label>
+					</nav>
 					<React.Fragment>{
 						this.state.instance_nodehostnames_dicts.map((instance_nodehostnames, index) =>{
 							return <InstancesPanel 
@@ -319,7 +330,7 @@
 				{"instancenum":0, "nodehostnames":["seti-node5","seti-node6","seti-node7","seti-node8"]},
 				{"instancenum":1, "nodehostnames":["seti-node5","seti-node6","seti-node7","seti-node8"]},
 			]}
-			rowcolors={["#456789", "#896745"]}
+			rowcolors={["#456789", "#353839"]}
 			node_count={8}
 			nodehostname_ids={{
 				"seti-node1": 0,
