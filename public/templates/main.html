@@ -127,7 +127,7 @@
 					}}
 				>	
 					<a className="panel" href={"/node?nodehostname="+this.props.nodehostname+"&instancenum="+this.props.instancenum}>
-						<div className = "genericpanelheading" style = {{color:this.determineHeadingColor(0.8)}}> 
+						<div className="genericpanelheading" style = {{color:this.determineHeadingColor(0.8)}}> 
 							<b>{this.props.nodehostname}/{this.props.instancenum}</b>
 							<progress value = {progressvals[0]} max = {progressvals[1]}></progress>
 						</div>
@@ -149,9 +149,17 @@
 					</div>
 					<div style={{height: "10px"}}></div>
 					<div>
-						<div className = "expand_collapse_link" onClick={this.togglePostProcExpanded.bind(this)}>
-							{this.state.postproc_expanded | expandedKeyNodes ? 'Collapse' : 'Expand'} Post Processing Keys
-						</div>
+						<React.Fragment>
+							{(()=>{
+								if(!expandedKeyNodes){
+									return (<div className="expand_collapse_link" onClick={this.togglePostProcExpanded.bind(this)}>
+									{this.state.postproc_expanded ? 'Collapse' : 'Expand'} Post Processing Keys
+									</div>)
+								} else {
+									return <div>Post Processing Keys</div>
+								}
+							})()}
+						</React.Fragment>
 						<div style={{display: this.state.postproc_expanded | expandedKeyNodes ? 'block' : 'none'}}>
 							<div className="postproc_keyvalues" id={"postproc_" + this.props.nodehostname + "_" + this.props.instancenum + "_basics"}>
 								<React.Fragment>
