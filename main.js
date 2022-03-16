@@ -78,13 +78,19 @@ app.get("/postprocstatus", (req, res) => {
 	var redishashname = "postprocpype://" + nodehostname + "/" + instancenum + "/status"
 
 	client.hgetall(redishashname, function(err, reply){
-		if (reply == null) {
+		if (err || reply == null) {
 			reply = {POSTPROC: null}
 		}
-		else if (err){
-			reply = Error(`fetch from ${redishashname} failed`)
+
+		reply_key_order = Object.keys(reply)
+		if ('_DISPORD' in reply_key_order) {
+			reply_key_order = reply['_DISPORD'].split(' ')
 		}
-		reply = reply['_DISPORD'].split(' ').reduce(function (result, key) {
+		else {
+			reply_key_order = reply_key_order.sort()
+		}
+
+		reply = reply_key_order.reduce(function (result, key) {
 			result[key] = reply[key];
 			return result;
 		}, {});
