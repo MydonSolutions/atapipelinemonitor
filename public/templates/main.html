@@ -301,10 +301,16 @@
 		render(){
 			return (
 				<div className="page">
-					<nav className = "side-navigation-bar">
-						<h2>ATA Pipeline Monitor</h2>
-						<input className="nav-item" id="expand_ppkeys_checkbox" type="checkbox" onChange={() => {expandedKeyNodes = document.getElementById('expand_ppkeys_checkbox').checked}}/>
-						<label htmlFor="postprockeys"> Expand all postprocessing keys </label>
+					<nav className="nav-bar">
+						<ul className="nav-list">
+						<li className="nav-item">
+						<h2 style={{margin: "5px"}}>ATA Pipeline Monitor</h2>
+						</li>
+						<li className="nav-item">
+						<input type="checkbox" id="expand_ppkeys_checkbox" onChange={() => {expandedKeyNodes = document.getElementById('expand_ppkeys_checkbox').checked}}/>
+						<label htmlFor="expand_ppkeys_checkbox">Expand postproc keys</label>
+						</li>
+						</ul>
 					</nav>
 					<React.Fragment>{
 						this.state.instance_nodehostnames_dicts.map((instance_nodehostnames, index) =>{

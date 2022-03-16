@@ -35,19 +35,59 @@
     display : flex;
     justify-content: space-between;
 }
-.side-navigation-bar{
-    position:fixed;
-    top:0;
-    left:0;
-    width:120px;
-    height:100%;
-    background-color:rgb(97, 97, 97);
+
+.nav-bar {
+    background: rgba(180, 180, 180,0.9);
+    /* Pay special attention here! */
+    position: sticky;
+    top: 0px;
+    z-index: 1;
+}
+
+.nav-list{
+    width:100%;
+    align-items: center;
+    padding: 0;
+    margin:0;
+    display:flex;
+} 
+.nav-item{
+    list-style: none;
+    margin-right: 2rem;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding: 0px;
+    border: solid black;
+    border-radius: 5px;
     text-align: center;
-    color:white;
 }
-.nav-item:checked{
-    background-color: grey;
+.nav-item:first-child{
+    /* Titular child */
+    margin-right:auto;
+    border:none;
+    margin-left:2rem;
 }
+/* Hide the checkboxes */
+input[type='checkbox'] {
+    display:none;
+}
+
+/* Default styling for labels to make them look like buttons */
+input[type='checkbox'] + label {
+  display:inline-block;
+  height:100%;
+  cursor:pointer;
+  font-weight: bold;
+  font-size: 18px;
+  padding: 3px;
+}
+
+/* Styling for labels when corresponding checkbox is checked */
+input[type='checkbox']:checked + label {
+  background-color:#123456;
+  color:white;
+}
+
 progress {
     border-radius: 5px; 
     width: 150px;
