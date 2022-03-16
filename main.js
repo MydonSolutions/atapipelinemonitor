@@ -81,7 +81,10 @@ app.get("/postprocstatus", (req, res) => {
 		if (reply == null) {
 			reply = {POSTPROC: null}
 		}
-		reply = Object.keys(reply).sort().reduce(function (result, key) {
+		else if (err){
+			reply = Error(`fetch from ${redishashname} failed`)
+		}
+		reply = reply['_DISPORD'].split(' ').reduce(function (result, key) {
 			result[key] = reply[key];
 			return result;
 		}, {});
