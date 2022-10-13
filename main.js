@@ -3,10 +3,10 @@ var fs = require('fs');
 const {URLSearchParams} = require('url')
 
 const redis = require("redis");
-const client = redis.createClient(6379, 'redishost');
+const client = redis.createClient(6379, 'localhost');
 
 const app = express()
-const port = 8081
+const port = 8082
 const host = '0.0.0.0'
 
 let summary_keys = []
@@ -100,7 +100,7 @@ app.get("/postprocstatus", (req, res) => {
 
 app.get('/ping', (req, res) => {
         const ip = req.connection.remoteAddress;
-        console.log("Ping at ", new Date(new Date().toUTCString()), " from ", ip)
+        // console.log("Ping at ", new Date(new Date().toUTCString()), " from ", ip)
         res.send('pong')
 })
 

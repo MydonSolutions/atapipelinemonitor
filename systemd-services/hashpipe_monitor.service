@@ -1,0 +1,15 @@
+[Unit]
+Description=Hashpipe REDIS monitor server
+After=network.target
+Requires=network.target
+
+[Service]
+Type=simple
+Restart=on-failure
+WorkingDirectory=/home/cosmic/dev/atapipelinemonitor
+ExecStart=/usr/bin/node /home/cosmic/dev/atapipelinemonitor/main.js
+StandardOutput=append:/home/cosmic/logs/hashpipe_monitor.out
+StandardError=append:/home/cosmic/logs/hashpipe_monitor.err
+
+[Install]
+WantedBy=multi-user.target
