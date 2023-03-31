@@ -75,7 +75,7 @@ app.get("/postprocstatus", (req, res) => {
 
 	var nodehostname = urlParams.get("nodehostname")
 	var instancenum = urlParams.get("instancenum")
-	var redishashname = "postprocpype://" + nodehostname + "/" + instancenum + "/status"
+	var redishashname = "pypeline://" + nodehostname + "/" + instancenum + "/status"
 
 	client.hgetall(redishashname, function(err, reply){
 		if (err || reply == null) {

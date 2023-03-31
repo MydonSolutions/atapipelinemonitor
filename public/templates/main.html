@@ -312,7 +312,7 @@
 					<nav className="nav-bar">
 						<ul className="nav-list">
 						<li className="nav-item">
-						<h2 style={{margin: "5px"}}>ATA Pipeline Monitor</h2>
+						<h2 style={{margin: "5px"}}>VLA Pipeline Monitor</h2>
 						</li>
 						<li className="nav-item">
 						<input type="checkbox" id="expand_ppkeys_checkbox" onChange={() => {expandedKeyNodes = document.getElementById('expand_ppkeys_checkbox').checked}}/>
@@ -339,20 +339,77 @@
 	
 	ReactDOM.render(<Page 
 			instance_nodehostnames_dicts={[
+				{"instancenum":0, "nodehostnames":[
+					"cosmic-gpu-2",
+					"cosmic-gpu-3",
+					"cosmic-gpu-4",
+					"cosmic-gpu-5",
+				]},
+				{"instancenum":1, "nodehostnames":[
+					"cosmic-gpu-2",
+					"cosmic-gpu-3",
+					"cosmic-gpu-4",
+					"cosmic-gpu-5",
+				]},
+				{"instancenum":0, "nodehostnames":[
+					"cosmic-gpu-6",
+					"cosmic-gpu-7",
+					"cosmic-gpu-8",
+					"cosmic-gpu-9",
+				]},
+				{"instancenum":1, "nodehostnames":[
+					"cosmic-gpu-6",
+					"cosmic-gpu-7",
+					"cosmic-gpu-8",
+					"cosmic-gpu-9",
+				]},
+				{"instancenum":0, "nodehostnames":[
+					"cosmic-gpu-10",
+					"cosmic-gpu-11",
+					"cosmic-gpu-12",
+					"cosmic-gpu-13",
+				]},
+				{"instancenum":1, "nodehostnames":[
+					"cosmic-gpu-10",
+					"cosmic-gpu-11",
+					"cosmic-gpu-12",
+					"cosmic-gpu-13",
+				]},
+				{"instancenum":0, "nodehostnames":[
+					"cosmic-gpu-14",
+					"cosmic-gpu-15",
+					"cosmic-gpu-16",
+					"cosmic-gpu-17",
+				]},
+				{"instancenum":1, "nodehostnames":[
+					"cosmic-gpu-14",
+					"cosmic-gpu-15",
+					"cosmic-gpu-16",
+					"cosmic-gpu-17",
+				]},
 				{"instancenum":0, "nodehostnames":["cosmic-gpu-0"]},
 				{"instancenum":1, "nodehostnames":["cosmic-gpu-0"]},
 			]}
 			rowcolors={["#456789", "#353839"]}
-			node_count={8}
+			node_count={17}
 			nodehostname_ids={{
-				"seti-node1": 0,
-				"seti-node2": 1,
-				"seti-node3": 2,
-				"seti-node4": 3,
-				"seti-node5": 4,
-				"seti-node6": 5,
-				"seti-node7": 6,
-				"seti-node8": 7
+				"cosmic-gpu-0": 0,
+				"cosmic-gpu-2": 2,
+				"cosmic-gpu-3": 3,
+				"cosmic-gpu-4": 4,
+				"cosmic-gpu-5": 5,
+				"cosmic-gpu-6": 6,
+				"cosmic-gpu-7": 7,
+				"cosmic-gpu-8": 8,
+				"cosmic-gpu-9": 9,
+				"cosmic-gpu-10": 10,
+				"cosmic-gpu-11": 11,
+				"cosmic-gpu-12": 12,
+				"cosmic-gpu-13": 13,
+				"cosmic-gpu-14": 14,
+				"cosmic-gpu-15": 15,
+				"cosmic-gpu-16": 16,
+				"cosmic-gpu-17": 17
 			}}
 		/>,
 		document.getElementById('root')
